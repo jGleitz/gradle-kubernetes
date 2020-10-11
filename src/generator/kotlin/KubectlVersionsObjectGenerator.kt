@@ -55,17 +55,13 @@ object KubectlVersionsObjectGenerator {
 		is KubectlRelease -> printDataInstance(instance, printLong = true)
 		is KubectlDistribution -> printDataInstance(instance, printLong = true)
 		is Version -> printDataInstance(instance, printLong = false)
-		is OperatingSystem -> when (instance) {
-			is Linux -> CodeBlock.of("%T", Linux::class)
-			is MacOs -> CodeBlock.of("%T", MacOs::class)
-			is Windows -> CodeBlock.of("%T", Windows::class)
-		}
+		is OperatingSystem -> printObjectInstance(instance)
 		else -> error("Cannot print ${instance::class}!")
 	}
 
 	private fun printDataInstance(instance: Any, printLong: Boolean): CodeBlock {
 		require(instance::class.isData) {
-			"Can only be used for instance of a data class (received ${instance::class})!"
+			"Expected an instance of a data class, received an instance of ${instance::class}!"
 		}
 		@Suppress("UNCHECKED_CAST") val instanceClass = instance::class as (KClass<Any>)
 		val openCode = CodeBlock.builder()
@@ -92,5 +88,12 @@ object KubectlVersionsObjectGenerator {
 			.apply { if (printLong) unindent() }
 			.add(")")
 			.build()
+	}
+
+	private fun printObjectInstance(instance: Any): CodeBlock {
+		require(instance::class.objectInstance != null) {
+			"Expected an instance of an object, received an instance of ${instance::class}!"
+		}
+		return CodeBlock.of("%T", instance::class)
 	}
 }
