@@ -18,7 +18,7 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
 object KubectlVersionsObjectGenerator {
-	private val KubectlVersion = ClassName("de.joshuagleitze.gradle.kubectl", "KubectlVersion")
+	internal val KubectlVersion = ClassName("de.joshuagleitze.gradle.kubectl", "KubectlVersion")
 
 	fun generateVersionsObject(executables: Iterable<KubectlRelease>, targetDir: File) {
 		val enum = TypeSpec.objectBuilder(KubectlVersion)
