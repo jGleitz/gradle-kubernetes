@@ -14,12 +14,16 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 object KubectlVersionsGenerator {
-	private val parallelism = 16
+	private val parallelism = 8
 	private val log = LoggerFactory.getLogger(this::class.java)
 
 	@JvmStatic
 	fun main(args: Array<String>) {
 		val targetDir = File(args[0])
+		val compilerOutputDir = File(args[1])
+
+		val preCheckedReleases = KubectlVersionsObjectReader(compilerOutputDir)
+
 		val releasedExecutables = runBlocking {
 			GitHubRepository("kubernetes", "kubectl").useForFlow { kubectlGitHubRepository ->
 				KubectlDownloadSite().useForFlow { kubectlDownloadSite ->
@@ -29,16 +33,18 @@ object KubectlVersionsGenerator {
 						.map { if (it.major == 0) it.copy(major = 1) else it }
 						.map { version ->
 							async {
-								runCatching {
-									kubectlDownloadSite.findExecutables(version)
+								preCheckedReleases.getOrElse(version) {
+									runCatching {
+										kubectlDownloadSite.findExecutables(version)
+									}
+										.onFailure { log.error(it.message) }
+										.getOrNull()
 								}
-									.onFailure { log.error(it.message) }
-									.getOrNull()
 							}
 						}
 						.buffer(parallelism - 2)
 						.mapNotNull { it.await() }
-						.onEach { log.info("verified ${it.version}") }
+						.onEach { log.debug("processed {}", it.version) }
 						.flowOn(Dispatchers.IO)
 				}
 			}.toList()

@@ -11,11 +11,13 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
+import io.ktor.utils.io.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.supervisorScope
 import org.slf4j.LoggerFactory
 import java.io.Closeable
+import java.security.MessageDigest
 
 class KubectlDownloadSite: Closeable {
 	private val log = LoggerFactory.getLogger(this::class.java)
@@ -38,18 +40,32 @@ class KubectlDownloadSite: Closeable {
 	}
 
 	private suspend fun findExecutable(kubectlVersion: String, os: OperatingSystem) = coroutineScope {
-		val hash = async { getSha512Hash(kubectlVersion, os) }
-		val downloadUrl = async { checkExecutableUrl(kubectlVersion, os) }
-		KubectlDistribution(os, downloadUrl.await(), hash.await())
+		val hashJob = async { getSha512Hash(kubectlVersion, os) }
+		val (downloadUrl, computedHashHex) = downloadExecutable(kubectlVersion, os)
+		val hash = hashJob.await()
+		log.debug("finished download from {}. expected hash: '{}', computedHash: '{}'", downloadUrl, hash, computedHashHex)
+		check(computedHashHex == hash) {
+			"hashes do not match for $downloadUrl: expected '$hash', found '$computedHashHex'"
+		}
+		log.info("verified {} for {}", kubectlVersion, os)
+		KubectlDistribution(os, downloadUrl, hash)
 	}
 
 	private suspend fun getSha512Hash(kubectlVersion: String, os: OperatingSystem) =
 		client.get<String>(KUBECTL_DOWNLOAD_URL(kubectlVersion, os) + ".sha512").trim()
 
-	private suspend fun checkExecutableUrl(kubectlVersion: String, os: OperatingSystem): String {
+	private suspend fun downloadExecutable(kubectlVersion: String, os: OperatingSystem): Pair<String, String> {
 		val downloadUrl = KUBECTL_DOWNLOAD_URL(kubectlVersion, os)
-		client.head<Unit>(downloadUrl)
-		return downloadUrl
+		val sha512Digest = MessageDigest.getInstance("SHA-512")
+		log.debug("Downloading executable from {}", downloadUrl)
+		client.get<ByteReadChannel>(downloadUrl)
+			.consumeEachBufferRange { buffer, _ ->
+				sha512Digest.update(buffer)
+				true
+			}
+			val hashHex = sha512Digest.digest()
+			.joinToString(separator = "") { "%02x".format(it) }
+		return downloadUrl to hashHex
 	}
 
 	companion object {

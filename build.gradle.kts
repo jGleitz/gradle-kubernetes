@@ -80,19 +80,22 @@ val compileGeneratorKotlin by tasks.existing(KotlinCompile::class) {
 	}
 }
 
+val compileGeneratedKotlin by tasks.existing
+
 val generateKubectlVersions by tasks.registering(JavaExec::class) {
 	classpath = generator.runtimeClasspath
 	mainClass.set("de.joshuagleitze.gradle.kubectl.generator.KubectlVersionsGenerator")
-	println(generated.withConvention(KotlinSourceSet::class) { kotlin.sourceDirectories.first() })
-	args(generated.withConvention(KotlinSourceSet::class) { kotlin.sourceDirectories.first() })
-}
-
-val compileGeneratedKotlin by tasks.existing {
-	mustRunAfter(generateKubectlVersions)
+	// compile the existing code first because it serves as a cache
+	dependsOn(compileGeneratedKotlin)
+	doFirst {
+		args(
+			generated.withConvention(KotlinSourceSet::class) { kotlin.sourceDirectories.first() },
+			compileGeneratedKotlin.get().outputs.files.singleFile
+		)
+	}
 }
 
 tasks.compileKotlin {
-	dependsOn(compileGeneratedKotlin)
 	kotlinOptions {
 		freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
 	}
