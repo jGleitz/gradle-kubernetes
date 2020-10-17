@@ -1,8 +1,6 @@
 package de.joshuagleitze.gradle.kubectl
 
 import de.joshuagleitze.gradle.kubectl.KubectlExtension.Companion.kubectlExtension
-import de.joshuagleitze.gradle.kubectl.data.KubectlDistribution
-import de.joshuagleitze.gradle.kubectl.data.KubectlRelease
 import de.joshuagleitze.gradle.kubectl.data.Linux
 import de.joshuagleitze.gradle.kubectl.data.MacOs
 import de.joshuagleitze.gradle.kubectl.data.OperatingSystem
@@ -11,6 +9,7 @@ import de.undercouch.gradle.tasks.download.Download
 import de.undercouch.gradle.tasks.download.DownloadTaskPlugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
 import org.gradle.nativeplatform.platform.internal.NativePlatformInternal
@@ -19,7 +18,7 @@ import java.time.temporal.ChronoUnit.SECONDS
 
 object KubectlDownloadTask {
 	const val NAME = "downloadKubectl"
-	private const val DOWNLOAD_TARGET_DIR = "kubectl"
+	const val DOWNLOAD_TARGET_DIR = "bin/kubectl"
 	private val DEFAULT_DOWNLOAD_TIMEOUT = Duration.of(60, SECONDS)
 
 	fun register(target: Project, platform: NativePlatformInternal): TaskProvider<out Task> {
@@ -34,23 +33,31 @@ object KubectlDownloadTask {
 			"Cannot download kubectl for the architecture ${platform.architecture}. Only amd64 is supported."
 		}
 
-		val distributionProvider = kubectlExtension.kubectlVersion.map { it[determineOperatingSystem(platform)] }
+		val operatingSystem = determineOperatingSystem(platform)
+		val distributionProvider = kubectlExtension.version.map { it[operatingSystem] }
 
 		src(distributionProvider.map { it.downloadUrl })
 
-		val targetFile = distributionProvider.map { distribution ->
-			project.gradle.gradleUserHomeDir.resolve(DOWNLOAD_TARGET_DIR).resolve(distribution.name).resolve(distribution.executableName)
+		val targetFile = kubectlExtension.version.flatMap { release ->
+			distributionProvider.map { distribution ->
+				project.gradle.gradleUserHomeDir
+					.resolve(DOWNLOAD_TARGET_DIR)
+					.resolve(distribution.name)
+					.resolve(release.version.toLowercaseNotation())
+					.resolve(distribution.executableName)
+			}
 		}
 		dest(targetFile)
 
 		readTimeout(DEFAULT_DOWNLOAD_TIMEOUT.toMillis().toInt())
+		overwrite(false)
 
 		doLast {
 			targetFile.get().setExecutable(true, true)
 		}
 	}
 
-	private fun determineOperatingSystem(platform: NativePlatformInternal): OperatingSystem {
+	internal fun determineOperatingSystem(platform: NativePlatformInternal): OperatingSystem {
 		val os = platform.operatingSystem
 		return when {
 			os.isLinux -> Linux
@@ -62,4 +69,6 @@ object KubectlDownloadTask {
 			)
 		}
 	}
+
+	val TaskContainer.downloadKubectl get() = named(NAME)
 }
