@@ -8,7 +8,15 @@ import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.property
 
 open class KubectlExtension(objects: ObjectFactory) {
-	val kubectlVersion = objects.property<KubectlRelease>().convention(DEFAULT_KUBECTL_VERSION)
+	/**
+	 * The version of kubectl that should be used by all tasks.
+	 */
+	val version = objects.property<KubectlRelease>().convention(DEFAULT_KUBECTL_VERSION)
+
+	/**
+	 * The path to the kubectl executable on this system.
+	 */
+	val executable = objects.fileProperty()
 
 	companion object {
 		private const val NAME = "kubectl"
