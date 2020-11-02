@@ -7,11 +7,8 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import de.joshuagleitze.gradle.kubectl.data.KubectlDistribution
 import de.joshuagleitze.gradle.kubectl.data.KubectlRelease
-import de.joshuagleitze.gradle.kubectl.data.Linux
-import de.joshuagleitze.gradle.kubectl.data.MacOs
 import de.joshuagleitze.gradle.kubectl.data.OperatingSystem
 import de.joshuagleitze.gradle.kubectl.data.Version
-import de.joshuagleitze.gradle.kubectl.data.Windows
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
@@ -52,14 +49,32 @@ object KubectlVersionsObjectGenerator {
 		null -> CodeBlock.of("null")
 		is Int -> CodeBlock.of("%L", instance)
 		is String -> CodeBlock.of("%S", instance)
-		is KubectlRelease -> printDataInstance(instance, printLong = true)
-		is KubectlDistribution -> printDataInstance(instance, printLong = true)
-		is Version -> printDataInstance(instance, printLong = false)
+		is KubectlRelease -> printKubectlRelease(instance)
+		is KubectlDistribution -> printDataInstance(instance, printArgumentNames = true, chopArguments = true)
+		is Version -> printDataInstance(instance, printArgumentNames = false, chopArguments = false)
 		is OperatingSystem -> printObjectInstance(instance)
 		else -> error("Cannot print ${instance::class}!")
 	}
 
-	private fun printDataInstance(instance: Any, printLong: Boolean): CodeBlock {
+	private fun printKubectlRelease(release: KubectlRelease): CodeBlock {
+		val distributionsCode = release.distributions.foldIndexed(CodeBlock.builder()) { index, code, distribution ->
+			code.add(printInstance(distribution))
+				.add(if (index < release.distributions.lastIndex) "," else "")
+				.add("\n")
+		}.build()
+
+		return CodeBlock.builder()
+			.add("%T(\n", KubectlRelease::class)
+			.indent()
+			.add(printInstance(release.version))
+			.add(",\n")
+			.add(distributionsCode)
+			.unindent()
+			.add(")")
+			.build()
+	}
+
+	private fun printDataInstance(instance: Any, printArgumentNames: Boolean, chopArguments: Boolean): CodeBlock {
 		require(instance::class.isData) {
 			"Expected an instance of a data class, received an instance of ${instance::class}!"
 		}
@@ -67,7 +82,7 @@ object KubectlVersionsObjectGenerator {
 		val openCode = CodeBlock.builder()
 			.add("%T(", instance::class)
 			.apply {
-				if (printLong) {
+				if (chopArguments) {
 					add("\n")
 					indent()
 				}
@@ -79,13 +94,13 @@ object KubectlVersionsObjectGenerator {
 				parameter.name ?: error("this parameter has no name: $parameter of ${instanceClass.primaryConstructor}")
 			] ?: error("cannot find the property corresponding to parameter $parameter!")
 			code
-				.add(if (printLong) "${parameter.name}·=·" else "")
+				.add(if (printArgumentNames) "${parameter.name}·=·" else "")
 				.add("%L", printInstance(parameterProperty(instance)))
 				.add(if (index < constructorParameters.lastIndex) "," else "")
-				.add(if (printLong) "\n" else if (index < constructorParameters.lastIndex) " " else "")
+				.add(if (chopArguments) "\n" else if (index < constructorParameters.lastIndex) " " else "")
 		}
 		return propertiesCode
-			.apply { if (printLong) unindent() }
+			.apply { if (chopArguments) unindent() }
 			.add(")")
 			.build()
 	}

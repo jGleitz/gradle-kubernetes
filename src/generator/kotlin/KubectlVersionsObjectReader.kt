@@ -36,4 +36,6 @@ class KubectlVersionsObjectReader(compilerOutputDir: File): Map<Version, Kubectl
 				}
 		}
 	}
+
+	val versions get() = keys
 }

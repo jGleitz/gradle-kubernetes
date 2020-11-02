@@ -51,8 +51,7 @@ dependencies {
 	generatorImplementation(name = "ktor-client-cio", version = ktorVersion, group = "io.ktor")
 	generatorImplementation(name = "ktor-client-logging", version = ktorVersion, group = "io.ktor")
 	generatorImplementation(name = "ktor-client-serialization", version = ktorVersion, group = "io.ktor")
-	generatorImplementation(name = "slf4j-api", version = "1.7.30", group = "org.slf4j")
-	generatorRuntime(name = "logback-classic", version = "1.2.3", group = "ch.qos.logback")
+	generatorImplementation(name = "jansi", version = "2.0.1", group = "org.fusesource.jansi")
 
 	generatedImplementation(data.output)
 
@@ -77,6 +76,7 @@ val compileGeneratorKotlin by tasks.existing(KotlinCompile::class) {
 		freeCompilerArgs += "-Xopt-in=kotlinx.serialization.ExperimentalSerializationApi"
 		freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
 		freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.FlowPreview"
+		freeCompilerArgs += "-Xopt-in=io.ktor.util.KtorExperimentalAPI"
 	}
 }
 
@@ -85,6 +85,7 @@ val compileGeneratedKotlin by tasks.existing
 val generateKubectlVersions by tasks.registering(JavaExec::class) {
 	classpath = generator.runtimeClasspath
 	mainClass.set("de.joshuagleitze.gradle.kubectl.generator.KubectlVersionsGenerator")
+	systemProperties["jansi.force"] = true
 	// compile the existing code first because it serves as a cache
 	dependsOn(compileGeneratedKotlin)
 	doFirst {
