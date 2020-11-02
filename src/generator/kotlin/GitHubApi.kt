@@ -12,18 +12,15 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.HttpHeaders.Link
 import io.ktor.http.LinkHeader.Rel.Next
-import io.ktor.util.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onCompletion
-import org.slf4j.LoggerFactory
+import kotlinx.coroutines.isActive
 import java.io.Closeable
 
 class GitHubApi: Closeable {
-	val log = LoggerFactory.getLogger(this::class.java)
 	val client = HttpClient(CIO) {
 		expectSuccess = true
 		install(Logging) {
@@ -41,7 +38,11 @@ class GitHubApi: Closeable {
 		}
 	}
 
-	inline fun <reified T> readAllPages(path: String, pageSize: Int = DEFAULT_PAGE_SIZE, crossinline block: HttpRequestBuilder.() -> Unit = {}): Flow<T> = flow {
+	inline fun <reified T> readAllPages(
+		path: String,
+		pageSize: Int = DEFAULT_PAGE_SIZE,
+		crossinline block: HttpRequestBuilder.() -> Unit = {}
+	): Flow<T> = flow {
 		require(pageSize <= MAX_PAGE_SIZE) {
 			"The page size must not exceed $MAX_PAGE_SIZE (was $pageSize)!"
 		}
@@ -51,7 +52,6 @@ class GitHubApi: Closeable {
 		}
 		while (nextTarget != null) {
 			val target = nextTarget
-			log.debug("requesting next page for $path")
 			val result = client.get<HttpResponse> {
 				apply(block)
 				url.apply(target)
@@ -61,7 +61,6 @@ class GitHubApi: Closeable {
 				?.let { nextUrl -> { takeFrom(nextUrl) } }
 		}
 	}
-		.buffer()
 		.flattenConcat()
 
 	override fun close() = client.close()
@@ -74,7 +73,15 @@ class GitHubApi: Closeable {
 				?.flatMap { it.split(",") }
 				?.map { HeaderValueWithParameters.parse(it, ::LinkHeader) }
 				?.find { link -> link.parameters.any { it.value == Next } }
-				?.let { link ->unpackLinkUrl(link.uri) }
+				?.let { link -> unpackLinkUrl(link.uri) }
+
 		private fun unpackLinkUrl(url: String) = url.trim().dropWhile { it == '<' }.dropLastWhile { it == '>' }
+
+		inline fun rethrowOnlyIfActive(context: CoroutineScope, block: () -> Unit) = try {
+			block()
+		} catch (error: Exception) {
+			if (context.isActive) throw error
+			else Unit // swallow error
+		}
 	}
 }

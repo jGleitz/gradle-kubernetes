@@ -1,56 +1,51 @@
 package de.joshuagleitze.gradle.kubectl.generator
 
 import de.joshuagleitze.gradle.kubectl.data.Version
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.runningReduce
+import kotlinx.coroutines.flow.switchMap
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import java.io.File
 
 object KubectlVersionsGenerator {
-	private val parallelism = 8
-	private val log = LoggerFactory.getLogger(this::class.java)
+	private const val parallelism = 4
 
 	@JvmStatic
 	fun main(args: Array<String>) {
 		val targetDir = File(args[0])
 		val compilerOutputDir = File(args[1])
-
 		val preCheckedReleases = KubectlVersionsObjectReader(compilerOutputDir)
 
-		val releasedExecutables = runBlocking {
-			GitHubRepository("kubernetes", "kubectl").useForFlow { kubectlGitHubRepository ->
-				KubectlDownloadSite().useForFlow { kubectlDownloadSite ->
+		runBlocking(Default) {
+			KubectlDownloadReport(reportIn = this).use { output ->
+				output.reportVersionsAsCached(preCheckedReleases.versions)
 
-					kubectlGitHubRepository.listTags()
-						.mapNotNull { Version.parse(it.name) }
-						.map { if (it.major == 0) it.copy(major = 1) else it }
-						.map { version ->
+				flowUsing(GitHubRepository("kubernetes", "kubectl")) { it.listTags() }
+					.mapNotNull { Version.parse(it.name) }
+					.map { if (it.major == 0) it.copy(major = 1) else it }
+					.onEach { output.reportVersion(it) }
+					.buffer(GitHubApi.MAX_PAGE_SIZE + 1)
+					.using(KubectlDownloadSite(output)) { kubectlDownloadSite ->
+						map { version ->
 							async {
-								preCheckedReleases.getOrElse(version) {
-									runCatching {
-										kubectlDownloadSite.findExecutables(version)
-									}
-										.onFailure { log.error(it.message) }
-										.getOrNull()
-								}
+								preCheckedReleases[version] ?: runCatching {
+									kubectlDownloadSite.findExecutables(version)
+								}.getOrNull()
 							}
 						}
-						.buffer(parallelism - 2)
-						.mapNotNull { it.await() }
-						.onEach { log.debug("processed {}", it.version) }
-						.flowOn(Dispatchers.IO)
-				}
-			}.toList()
+							.buffer(parallelism - 2)
+							.mapNotNull { it.await() }
+					}
+					.bufferedChunks(128)
+					.runningReduce { last, new -> last + new }
+					.collect { KubectlVersionsObjectGenerator.generateVersionsObject(it, targetDir) }
+			}
 		}
-
-		KubectlVersionsObjectGenerator.generateVersionsObject(releasedExecutables, targetDir)
-		log.info("Generated object with ${releasedExecutables.size} versions to $targetDir.")
 	}
 }
