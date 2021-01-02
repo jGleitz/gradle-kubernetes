@@ -1,2 +1,3 @@
-rootProject.name = "gradle-kubectl"
+rootProject.name = "gradle-kubernetes"
 
+include("common", "kubernetes", "kubectl")
