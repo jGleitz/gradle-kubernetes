@@ -87,13 +87,13 @@ class Minikube private constructor(
 			if (instanceCount.decrementAndGet() <= 0) stop()
 		}
 
-			private fun stop() {
-				ByteArrayOutputStream().use { errorBuffer ->
-					val stopProcess = OutputBufferingProcess(minikube("delete"))
-						.transferOutput(errorStream = TeeOutputStream(System.err, errorBuffer))
-					check(stopProcess.runAndWaitFor() == 0) {
-						"Failed to stop the minikube cluster!"
-					}
+		private fun stop() {
+			ByteArrayOutputStream().use { errorBuffer ->
+				val stopProcess = OutputBufferingProcess(minikube("delete"))
+					.transferOutput(errorStream = TeeOutputStream(System.err, errorBuffer))
+				check(stopProcess.runAndWaitFor() == 0) {
+					"Failed to stop the minikube cluster! Error output was: ${System.lineSeparator()}${System.lineSeparator()}$errorBuffer"
+				}
 			}
 		}
 	}
