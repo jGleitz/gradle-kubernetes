@@ -29,8 +29,6 @@ object LineFilterSpec: Spek({
 			lineFilter.flush()
 
 			expect(targetStream.toString()).toBe("test")
-
-			expect(Path.of("/foo/bar")).contains(Path.of("bar"))
 		}
 
 

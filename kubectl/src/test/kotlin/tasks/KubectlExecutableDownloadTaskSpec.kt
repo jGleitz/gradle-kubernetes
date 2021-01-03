@@ -34,7 +34,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.spekframework.spek2.Spek
 import java.io.File
 import java.net.URL
-import java.nio.file.Path
+import kotlin.io.path.Path
 
 object KubectlExecutableDownloadTaskSpec: Spek({
 	describeType<KubectlExecutableDownloadTaskSpec> {
@@ -141,7 +141,7 @@ object KubectlExecutableDownloadTaskSpec: Spek({
 
 				expect(testTask.targetFile)
 					.getAsPath()
-					.contains(Path.of(pathName))
+					.contains(Path(pathName))
 			}
 		}
 
