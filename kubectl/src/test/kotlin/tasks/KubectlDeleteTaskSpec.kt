@@ -13,7 +13,6 @@ import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.gradle.kubectl.KubectlPlugin
 import de.joshuagleitze.gradle.kubectl.action.KubectlAction
 import de.joshuagleitze.gradle.kubectl.action.mockWorkerExecutorFor
-import de.joshuagleitze.gradle.kubectl.data.Arguments
 import de.joshuagleitze.gradle.kubectl.data.LabelSelector
 import de.joshuagleitze.gradle.kubectl.data.Selector
 import de.joshuagleitze.gradle.kubectl.tasks.KubectlExecutableDownloadTask.Companion.downloadKubectl
@@ -79,13 +78,14 @@ object KubectlDeleteTaskSpec: Spek({
 		}
 
 		it("sets the --kustomize option") {
+            val testKustomizationDir = testFiles.createDirectory("kustomization")
 			registerKubectlDeleteTask("kustomizationOption") {
-				kustomizationDir.set(File("/test/dir"))
+				kustomizationDir.set(testKustomizationDir.toFile())
 			}.delete()
 
 			expect(createdParameters.single())
 				.feature(KubectlAction.Parameters::arguments).get()
-				.contains("--kustomize=/test/dir")
+				.contains("--kustomize=$testKustomizationDir")
 		}
 
 		it("appends the options of the selector") {

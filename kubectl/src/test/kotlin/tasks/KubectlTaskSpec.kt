@@ -16,6 +16,7 @@ import de.joshuagleitze.gradle.kubernetes.data.KubernetesClusterConnection
 import de.joshuagleitze.test.dependencies
 import de.joshuagleitze.test.get
 import de.joshuagleitze.test.getAsFile
+import de.joshuagleitze.test.spek.testfiles.testFiles
 import io.mockk.confirmVerified
 import org.gradle.api.Project
 import org.gradle.workers.WorkerExecutor
@@ -29,6 +30,7 @@ abstract class KubectlTaskSpec<KubectlTaskType: KubectlTask>(
 	createTask: Project.(name: String, workerExecutor: WorkerExecutor) -> KubectlTaskType,
 	execute: KubectlTaskType.() -> Unit
 ): Spek({
+    val testFiles = testFiles()
 	val createdParameters by memoized { LinkedList<KubectlAction.Parameters>() }
 	val mockWorkerExecutor by memoized { testProject().mockWorkerExecutorFor(KubectlAction::class, createdParameters) }
 	fun newTask(name: String) = testProject().createTask(name, mockWorkerExecutor)
@@ -54,7 +56,7 @@ abstract class KubectlTaskSpec<KubectlTaskType: KubectlTask>(
 		}
 
 		it("sets the executable to the output of the download task") {
-			val testExecutable = File("/foo/bar")
+			val testExecutable = testFiles.createFile("kubectl").toFile()
 			val testTask = newTask("setsExecutable")
 			testTask.project.tasks.downloadKubectl.configure {
 				it.targetFile.set(testExecutable)
