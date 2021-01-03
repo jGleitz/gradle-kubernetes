@@ -18,13 +18,15 @@ import de.joshuagleitze.gradle.kubernetes.data.NoAuth
 import de.joshuagleitze.test.describeType
 import de.joshuagleitze.test.spek.testfiles.testFiles
 import org.spekframework.spek2.Spek
+import org.spekframework.spek2.lifecycle.CachingMode
+import org.spekframework.spek2.lifecycle.CachingMode.SCOPE
 import java.io.File
 import java.net.URI
 import java.nio.file.Path
 
 object KubectlClusterConnectionSpec: Spek({
     val testFiles = testFiles()
-    val certificate by memoized { testFiles.createFile("certificate") }
+    val certificate by memoized(SCOPE) { testFiles.createFile("certificate") }
 
 	describeType<KubeconfigContext> {
 		it("generates the --context option") {
