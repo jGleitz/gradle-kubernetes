@@ -22,6 +22,6 @@ fun typeDescription(klass: Class<*>): String =
 		else -> typeDescription(declaringClass) + "." + klass.simpleName
 	}
 
-fun forGradleTest(): Long = 90.seconds.toLongMilliseconds()
+fun forGradleTest(): Long = 180.seconds.toLongMilliseconds()
 
 fun forMinikubeTest(): Long = 120.seconds.toLongMilliseconds()
