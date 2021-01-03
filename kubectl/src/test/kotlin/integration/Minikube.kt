@@ -2,6 +2,7 @@ package de.joshuagleitze.gradle.kubectl.integration
 
 import org.apache.commons.io.output.TeeOutputStream
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.io.OutputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
@@ -89,14 +90,10 @@ class Minikube private constructor(
 		private val task = FutureTask {
 			val process = processBuilder.start()
 			Thread {
-				outputTarget.use { outputPipe ->
-					process.inputStream.transferTo(outputPipe)
-				}
+				outputTarget.use { process.inputStream.backportedTransferTo(it) }
 			}.startAndRegisterToWaitFor()
 			Thread {
-				errorTarget.use { errorPipe ->
-					process.errorStream.transferTo(errorPipe)
-				}
+				errorTarget.use { process.errorStream.backportedTransferTo(it) }
 			}.startAndRegisterToWaitFor()
 
 			val exitValue = process.waitFor()
@@ -110,8 +107,8 @@ class Minikube private constructor(
 
 		fun transferOutput(outputStream: OutputStream = System.out, errorStream: OutputStream = System.err) = apply {
 			synchronized(threadsToWaitFor) {
-				Thread { outputBuffer.transferTo(outputStream) }.startAndRegisterToWaitFor()
-				Thread { errorBuffer.transferTo(errorStream) }.startAndRegisterToWaitFor()
+				Thread { outputBuffer.use { it.backportedTransferTo(outputStream) } }.startAndRegisterToWaitFor()
+				Thread { errorBuffer.use { it.backportedTransferTo(errorStream) } }.startAndRegisterToWaitFor()
 			}
 		}
 
@@ -123,5 +120,17 @@ class Minikube private constructor(
 		override fun run() = task.run()
 
 		val isDone get() = task.isDone
+
+		// InputStream.transferTo is only available since JDK 9 :(
+		private fun InputStream.backportedTransferTo(out: OutputStream, bufferSize: Int = 8192): Long {
+			var transferred: Long = 0
+			val buffer = ByteArray(bufferSize)
+			var read: Int
+			while (this.read(buffer, 0, bufferSize).also { read = it } >= 0) {
+				out.write(buffer, 0, read)
+				transferred += read.toLong()
+			}
+			return transferred
+		}
 	}
 }
