@@ -274,7 +274,13 @@ object KubectlActionSpec: Spek({
 			}
 
 			it("closes the standardOutput stream") {
-				val testStandardOutput = spyk(ByteArrayOutputStream())
+				val testStandardOutput = spyk(ByteArrayOutputStream()) {
+					excludeRecords {
+						write(any<ByteArray>())
+						write(any(), any(), any())
+						flush()
+					}
+				}
 				val testAction = testKubectlAction(standardOutput = testStandardOutput)
 				every { mockExecOperations.exec(any()) } answersUsingExecSpec {
 					standardOutput.write("abc".toByteArray())
@@ -282,11 +288,6 @@ object KubectlActionSpec: Spek({
 				}
 				testAction.execute()
 
-				excludeRecords {
-					testStandardOutput.write(any<ByteArray>())
-					testStandardOutput.write(any(), any(), any())
-					testStandardOutput.flush()
-				}
 				verify {
 					testStandardOutput.close()
 				}
@@ -294,7 +295,13 @@ object KubectlActionSpec: Spek({
 			}
 
 			it("closes the errorOutput stream") {
-				val testErrorOutput = spyk(ByteArrayOutputStream())
+				val testErrorOutput = spyk(ByteArrayOutputStream()) {
+					excludeRecords {
+						write(any<ByteArray>())
+						write(any(), any(), any())
+						flush()
+					}
+				}
 				val testAction = testKubectlAction(errorOutput = testErrorOutput)
 				every { mockExecOperations.exec(any()) } answersUsingExecSpec {
 					errorOutput.write("abc".toByteArray())
@@ -302,11 +309,6 @@ object KubectlActionSpec: Spek({
 				}
 				testAction.execute()
 
-				excludeRecords {
-					testErrorOutput.write(any<ByteArray>())
-					testErrorOutput.write(any(), any(), any())
-					testErrorOutput.flush()
-				}
 				verify {
 					testErrorOutput.close()
 				}
@@ -315,7 +317,14 @@ object KubectlActionSpec: Spek({
 
 			it("does not close the standardOutput when defaulting to System.out") {
 				val oldOut = System.out
-				val testStandardOutput = spyk(ByteArrayOutputStream())
+				val testStandardOutput = spyk(ByteArrayOutputStream()) {
+					excludeRecords {
+						write(any<ByteArray>())
+						write(any(), any(), any())
+						flush()
+					}
+				}
+
 				System.setOut(PrintStream(testStandardOutput))
 				try {
 					val testAction = testKubectlAction()
@@ -328,18 +337,20 @@ object KubectlActionSpec: Spek({
 					System.setOut(oldOut)
 				}
 
-				excludeRecords {
-					testStandardOutput.write(any<ByteArray>())
-					testStandardOutput.write(any(), any(), any())
-					testStandardOutput.flush()
-				}
 				confirmVerified(testStandardOutput)
 			}
 
 			it("does not close the errorOutput when defaulting to System.out") {
 				val oldErr = System.err
-				val testErrorOutput = spyk(ByteArrayOutputStream())
+				val testErrorOutput = spyk(ByteArrayOutputStream()) {
+					excludeRecords {
+						write(any<ByteArray>())
+						write(any(), any(), any())
+						flush()
+					}
+				}
 				System.setErr(PrintStream(testErrorOutput))
+
 				try {
 					val testAction = testKubectlAction()
 					every { mockExecOperations.exec(any()) } answersUsingExecSpec {
@@ -351,11 +362,6 @@ object KubectlActionSpec: Spek({
 					System.setErr(oldErr)
 				}
 
-				excludeRecords {
-					testErrorOutput.write(any<ByteArray>())
-					testErrorOutput.write(any(), any(), any())
-					testErrorOutput.flush()
-				}
 				confirmVerified(testErrorOutput)
 			}
 		}
