@@ -37,6 +37,8 @@ jobs:
         run: ./gradlew assemble testClasses
       - name: Test
         run: ./gradlew test
+        env:
+          DISABLE_MINIKUBE_TEST:  ${{ matrix.os == 'windows-latest' }}
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
         if: failure()

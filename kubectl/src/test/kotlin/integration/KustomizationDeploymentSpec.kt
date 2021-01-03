@@ -5,6 +5,7 @@ import ch.tutteli.atrium.api.fluent.en_GB.containsNot
 import ch.tutteli.atrium.api.fluent.en_GB.exactly
 import ch.tutteli.atrium.api.fluent.en_GB.value
 import ch.tutteli.atrium.api.verbs.expect
+import de.joshuagleitze.gradle.kubectl.integration.KustomizationDeploymentSpec.ifMinikubeTestDisabled
 import de.joshuagleitze.gradle.kubectl.tasks.KubectlExecutableVerificationTask
 import de.joshuagleitze.test.GradleIntegrationTestProject.integrationTestProject
 import de.joshuagleitze.test.forGradleTest
@@ -14,17 +15,18 @@ import de.joshuagleitze.test.gradle.task
 import de.joshuagleitze.test.gradle.wasInvoked
 import de.joshuagleitze.test.gradle.wasSuccessful
 import org.spekframework.spek2.Spek
+import org.spekframework.spek2.dsl.Skip
 import org.spekframework.spek2.style.specification.describe
 import kotlin.io.path.*
 import kotlin.time.seconds
 
 object KustomizationDeploymentSpec: Spek({
-	val minikube = Minikube.use()
-	beforeGroup(minikube::awaitStart)
-	afterGroup(minikube::stop)
-	beforeEachTest(integrationTestProject::prepare)
+	describe("kustomization deployment", skip = ifMinikubeTestDisabled()) {
+		val minikube = Minikube.use()
+		beforeGroup(minikube::awaitStart)
+		afterGroup(minikube::stop)
+		beforeEachTest(integrationTestProject::prepare)
 
-	describe("kustomization deployment") {
 		fun setupKustomizationHelloWorldProject() {
 			// example from https://github.com/kubernetes-sigs/kustomize/tree/master/examples/helloWorld
 			with(integrationTestProject) {
@@ -172,4 +174,8 @@ object KustomizationDeploymentSpec: Spek({
 			}
 		}
 	}
-})
+}) {
+	fun ifMinikubeTestDisabled() =
+		if (System.getenv("DISABLE_MINIKUBE_TEST") == "true") Skip.Yes("DISABLE_MINIKUBE_TEST is set")
+		else Skip.No
+}
