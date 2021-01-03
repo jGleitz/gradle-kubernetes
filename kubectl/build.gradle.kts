@@ -51,7 +51,7 @@ dependencies {
 
 	generatorImplementation(data.output)
 	generatorImplementation(kotlin("reflect"))
-	generatorImplementation(name = "kotlinx-coroutines-core", version = "1.3.9", group = "org.jetbrains.kotlinx")
+	generatorImplementation(name = "kotlinx-coroutines-core", version = "1.4.2", group = "org.jetbrains.kotlinx")
 	generatorImplementation(name = "kotlinx-serialization-json", version = "1.0.0-RC2", group = "org.jetbrains.kotlinx")
 	generatorImplementation(name = "kotlinpoet", version = "1.7.2", group = "com.squareup")
 	generatorImplementation(name = "ktor-client-cio", version = ktorVersion, group = "io.ktor")
