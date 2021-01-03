@@ -15,9 +15,11 @@ class Minikube private constructor(
 	private val kubectlDownloadProcess: OutputBufferingProcess
 ) {
 	fun awaitStart() {
-		startProcess.transferOutput()
-		check(startProcess.waitFor() == 0) {
-			"Failed to create the minikube cluster!"
+		ByteArrayOutputStream().use { errorBuffer ->
+			startProcess.transferOutput(errorStream = TeeOutputStream(System.err, errorBuffer))
+			check(startProcess.waitFor() == 0) {
+				"Failed to create the minikube cluster! Error output was: ${System.lineSeparator()}${System.lineSeparator()}$errorBuffer"
+			}
 		}
 	}
 
