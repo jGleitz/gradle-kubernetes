@@ -56,15 +56,15 @@ object KubectlActionSpec: Spek({
 
 	describeType<KubectlAction> {
 		it("uses the configured executable") {
-			val testExecutable = File("/the/special/executable")
+			val testExecutable = testFiles.createFile("special-executable")
 			val testAction = testKubectlAction {
-				executable.set(testExecutable)
+				executable.set(testExecutable.toFile())
 			}
 			testAction.execute()
 
 			expect(createdExecSpecs.single())
 				.feature(ExecSpec::getExecutable)
-				.toBe(testExecutable.absolutePath)
+				.toBe(testExecutable.toString())
 		}
 
 		it("uses the configured arguments") {

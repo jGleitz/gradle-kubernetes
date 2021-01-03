@@ -16,12 +16,16 @@ import de.joshuagleitze.gradle.kubernetes.data.KubernetesCluster
 import de.joshuagleitze.gradle.kubernetes.data.KubernetesClusterConnection
 import de.joshuagleitze.gradle.kubernetes.data.NoAuth
 import de.joshuagleitze.test.describeType
+import de.joshuagleitze.test.spek.testfiles.testFiles
 import org.spekframework.spek2.Spek
 import java.io.File
 import java.net.URI
 import java.nio.file.Path
 
 object KubectlClusterConnectionSpec: Spek({
+    val testFiles = testFiles()
+    val certificate by memoized { testFiles.createFile("certificate") }
+
 	describeType<KubeconfigContext> {
 		it("generates the --context option") {
 			expect(KubeconfigContext("testname"))
@@ -34,14 +38,14 @@ object KubectlClusterConnectionSpec: Spek({
 		it("combines the options of its values") {
 			expect(
 				KubernetesCluster(
-					KubernetesApiServer(URI.create("https://example.com"), File("/foo/bar")),
+					KubernetesApiServer(URI.create("https://example.com"), certificate),
 					BasicAuth("testuser", "testpassword")
 				)
 			)
 				.feature(KubernetesClusterConnection::generateKubectlArguments).asList()
 				.containsExactly(
 					"--server=https://example.com",
-					"--certificate-authority=/foo/bar",
+					"--certificate-authority=$certificate",
 					"--username=testuser",
 					"--password=testpassword"
 				)
@@ -58,15 +62,15 @@ object KubectlClusterConnectionSpec: Spek({
 
 	describeType<KubernetesApiServer> {
 		it("generates the --server and --certificate-authority options (from Path)") {
-			expect(KubernetesApiServer(URI.create("https://example.com"), Path.of("/foo/bar")))
+			expect(KubernetesApiServer(URI.create("https://example.com"), certificate))
 				.feature(KubernetesApiServerOptions::generateKubectlArguments).asList()
-				.containsExactly("--server=https://example.com", "--certificate-authority=/foo/bar")
+				.containsExactly("--server=https://example.com", "--certificate-authority=$certificate")
 		}
 
 		it("generates the --server and --certificate-authority options (from File)") {
-			expect(KubernetesApiServer(URI.create("https://example.com"), File("/foo/bar")))
+			expect(KubernetesApiServer(URI.create("https://example.com"), certificate.toFile()))
 				.feature(KubernetesApiServerOptions::generateKubectlArguments).asList()
-				.containsExactly("--server=https://example.com", "--certificate-authority=/foo/bar")
+				.containsExactly("--server=https://example.com", "--certificate-authority=$certificate")
 		}
 
 		it("omits --certificate-authority if it is null (from Path)") {

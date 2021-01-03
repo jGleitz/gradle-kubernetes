@@ -5,10 +5,8 @@ import ch.tutteli.atrium.api.fluent.en_GB.containsNot
 import ch.tutteli.atrium.api.fluent.en_GB.feature
 import ch.tutteli.atrium.api.fluent.en_GB.get
 import ch.tutteli.atrium.api.fluent.en_GB.isNotEmpty
-import ch.tutteli.atrium.api.fluent.en_GB.messageContains
 import ch.tutteli.atrium.api.fluent.en_GB.notToBeNull
 import ch.tutteli.atrium.api.fluent.en_GB.toBe
-import ch.tutteli.atrium.api.fluent.en_GB.toThrow
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.gradle.kubectl.KubectlPlugin
 import de.joshuagleitze.gradle.kubectl.action.KubectlAction
@@ -19,14 +17,12 @@ import de.joshuagleitze.gradle.kubernetes.data.KubeconfigContext
 import de.joshuagleitze.test.describeType
 import de.joshuagleitze.test.get
 import de.joshuagleitze.test.spek.testfiles.testFiles
-import io.mockk.confirmVerified
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.kotlin.dsl.apply
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.workers.WorkerExecutor
 import org.spekframework.spek2.Spek
-import java.io.File
 import java.util.LinkedList
 
 object KubectlApplyTaskSpec: Spek({
@@ -63,13 +59,14 @@ object KubectlApplyTaskSpec: Spek({
 		}
 
 		it("sets the --kustomize option") {
+            val testKustomizationDir = testFiles.createDirectory("kustomization")
 			registerKubectlApplyTask("kustomizationOption") {
-				kustomizationDir.set(File("/test/dir"))
+				kustomizationDir.set(testKustomizationDir.toFile())
 			}.apply()
 
 			expect(createdParameters.single())
 				.feature(KubectlAction.Parameters::arguments).get()
-				.contains("--kustomize=/test/dir")
+				.contains("--kustomize=$testKustomizationDir")
 		}
 
 		it("puts itself into the $DEPLOYMENT_TASK_GROUP group") {
