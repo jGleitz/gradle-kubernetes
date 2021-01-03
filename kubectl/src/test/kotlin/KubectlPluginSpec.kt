@@ -25,6 +25,7 @@ import org.gradle.kotlin.dsl.findPlugin
 import org.gradle.testfixtures.ProjectBuilder
 import org.spekframework.spek2.Spek
 import kotlin.io.path.*
+import kotlin.time.seconds
 
 object KubectlPluginSpec: Spek({
 	val testProject by memoized {
@@ -33,7 +34,7 @@ object KubectlPluginSpec: Spek({
 	}
 
 	describeType<KubectlPlugin> {
-		it("registers the ${KubernetesExtension.NAME} plugin") {
+		it("registers the ${KubernetesExtension.NAME} plugin", timeout = 20.seconds.toLongMilliseconds() /* for CI */) {
 			expect(testProject) {
 				feature(Project::getPlugins)
 					.feature(PluginContainer::findPlugin, KubernetesPlugin::class)
