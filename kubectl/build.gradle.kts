@@ -36,7 +36,7 @@ dependencies {
 	api(project(":kubernetes"))
 	implementation(gradleKotlinDsl())
 	implementation(name = "gradle-download-task", version = "4.1.1", group = "de.undercouch")
-	implementation(name = "commons-io", version = "2.7", group = "commons-io")
+	implementation(name = "commons-io", version = "2.8.0", group = "commons-io")
 	implementation(name = "string-notation", version = "1.4.0", group = "de.joshuagleitze")
 	implementation(name = "kotlinx-serialization-json", group = "org.jetbrains.kotlinx", version = "1.0.0")
 	implementation(name = "kaml", group = "com.charleskorn.kaml", version = "0.26.0")
