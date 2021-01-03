@@ -32,8 +32,7 @@ class Minikube private constructor(
 		return ByteArrayOutputStream().use { outputBuffer ->
 			val commandProcess = OutputBufferingProcess(minikube("kubectl", "--", *args))
 				.transferOutput(outputStream = TeeOutputStream(System.out, outputBuffer))
-			commandProcess.run()
-			check(commandProcess.waitFor() == 0) {
+			check(commandProcess.runAndWaitFor() == 0) {
 				"kubectl ${args.joinToString(separator = " ")} failed!"
 			}
 			outputBuffer.toString()
@@ -58,7 +57,18 @@ class Minikube private constructor(
 
 		private fun minikube(vararg args: String) = ProcessBuilder(minikubeExecutable, "--profile=$CONTEXT_NAME", *args)
 
-		private fun scheduleStart() = OutputBufferingProcess(minikube("start", "--interactive=false")).also { Thread(it).start() }
+		private fun scheduleStart(): OutputBufferingProcess {
+			// if the previous test was aborted, the minikube cluster might be in an inconsistent state. Hence, we run delete first. It is
+			// quick and improves our chances of starting the cluster successfully. We do not care about the result of deleting the previous
+			// cluster, but only about starting the new one.
+			val deleteProcess = minikube("delete")
+			val startProcess = OutputBufferingProcess(minikube("start", "--interactive=false"))
+			Thread {
+				deleteProcess.start().waitFor()
+				startProcess.run()
+			}.start()
+			return startProcess
+		}
 
 		private fun scheduleKubectlDownload(startProcess: OutputBufferingProcess) =
 			OutputBufferingProcess(minikube("kubectl", "--", "version")).also { downloadProcess ->
@@ -74,11 +84,16 @@ class Minikube private constructor(
 		}
 
 		private fun deregister() {
-			if (instanceCount.decrementAndGet() <= 0) {
-				val stopProcess = minikube("delete").inheritIO().start()
-				check(stopProcess.waitFor() == 0) {
-					"Failed to stop the minikube cluster!"
-				}
+			if (instanceCount.decrementAndGet() <= 0) stop()
+		}
+
+			private fun stop() {
+				ByteArrayOutputStream().use { errorBuffer ->
+					val stopProcess = OutputBufferingProcess(minikube("delete"))
+						.transferOutput(errorStream = TeeOutputStream(System.err, errorBuffer))
+					check(stopProcess.runAndWaitFor() == 0) {
+						"Failed to stop the minikube cluster!"
+					}
 			}
 		}
 	}
@@ -106,6 +121,11 @@ class Minikube private constructor(
 		}
 
 		fun waitFor(): Int = task.get()
+
+		fun runAndWaitFor(): Int {
+			run()
+			return waitFor()
+		}
 
 		fun transferOutput(outputStream: OutputStream = System.out, errorStream: OutputStream = System.err) = apply {
 			synchronized(threadsToWaitFor) {
