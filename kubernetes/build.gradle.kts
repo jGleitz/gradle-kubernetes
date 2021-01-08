@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.config.KotlinCompilerVersion
+
 plugins {
 	kotlin("jvm")
 	`java-gradle-plugin`
@@ -26,6 +28,10 @@ dependencies {
 	testImplementation(name = "spek-testfiles", version = "1.0.3", group = "de.joshuagleitze")
 	testImplementation(name = "mockk", version = "1.10.4", group = "io.mockk")
 	testRuntimeOnly(name = "spek-runner-junit5", version = spekVersion, group = "org.spekframework.spek2")
+
+    constraints {
+        testImplementation(kotlin("reflect", version = KotlinCompilerVersion.VERSION))
+    }
 }
 
 kotlin {

@@ -1,5 +1,6 @@
 import de.undercouch.gradle.tasks.download.Download
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -62,7 +63,7 @@ dependencies {
 	generatedImplementation(data.output)
 
 	constraints {
-		testImplementation(kotlin("reflect", version = org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
+		testImplementation(kotlin("reflect", version = KotlinCompilerVersion.VERSION))
 	}
 }
 
