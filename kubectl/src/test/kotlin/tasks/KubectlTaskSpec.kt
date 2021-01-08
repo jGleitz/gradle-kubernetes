@@ -16,7 +16,7 @@ import de.joshuagleitze.gradle.kubernetes.data.KubernetesClusterConnection
 import de.joshuagleitze.test.dependencies
 import de.joshuagleitze.test.get
 import de.joshuagleitze.test.getAsFile
-import de.joshuagleitze.test.spek.testfiles.testFiles
+import de.joshuagleitze.testfiles.spek.testFiles
 import io.mockk.confirmVerified
 import org.gradle.api.Project
 import org.gradle.workers.WorkerExecutor

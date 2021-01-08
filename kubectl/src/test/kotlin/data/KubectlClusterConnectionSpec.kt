@@ -16,7 +16,7 @@ import de.joshuagleitze.gradle.kubernetes.data.KubernetesCluster
 import de.joshuagleitze.gradle.kubernetes.data.KubernetesClusterConnection
 import de.joshuagleitze.gradle.kubernetes.data.NoAuth
 import de.joshuagleitze.test.describeType
-import de.joshuagleitze.test.spek.testfiles.testFiles
+import de.joshuagleitze.testfiles.spek.testFiles
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.lifecycle.CachingMode
 import org.spekframework.spek2.lifecycle.CachingMode.SCOPE

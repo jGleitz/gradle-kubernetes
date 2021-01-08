@@ -11,8 +11,8 @@ import de.joshuagleitze.test.dependencies
 import de.joshuagleitze.test.getByName
 import de.joshuagleitze.test.mustRunAfter
 import de.joshuagleitze.test.name
-import de.joshuagleitze.test.spek.testfiles.testFiles
 import de.joshuagleitze.test.tasks
+import de.joshuagleitze.testfiles.spek.testFiles
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
