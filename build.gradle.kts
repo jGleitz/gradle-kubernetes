@@ -9,7 +9,7 @@ status = if (isSnapshot) "snapshot" else "release"
 
 allprojects {
 	repositories {
-		mavenCentral()
+		jcenter()
 	}
 }
 
