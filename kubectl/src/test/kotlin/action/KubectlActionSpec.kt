@@ -9,7 +9,7 @@ import ch.tutteli.atrium.api.fluent.en_GB.toBe
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.test.describeType
 import de.joshuagleitze.test.instantiator
-import de.joshuagleitze.test.spek.testfiles.testFiles
+import de.joshuagleitze.testfiles.spek.testFiles
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.excludeRecords

@@ -20,7 +20,7 @@ import de.joshuagleitze.gradle.kubectl.tasks.TeardownTask.TEARDOWN_TASK_GROUP
 import de.joshuagleitze.gradle.kubernetes.data.KubeconfigContext
 import de.joshuagleitze.test.describeType
 import de.joshuagleitze.test.get
-import de.joshuagleitze.test.spek.testfiles.testFiles
+import de.joshuagleitze.testfiles.spek.testFiles
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.kotlin.dsl.apply

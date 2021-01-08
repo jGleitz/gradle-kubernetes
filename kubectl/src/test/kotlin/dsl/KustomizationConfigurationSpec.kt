@@ -15,7 +15,7 @@ import de.joshuagleitze.test.findByName
 import de.joshuagleitze.test.get
 import de.joshuagleitze.test.getAsFile
 import de.joshuagleitze.test.getAsPath
-import de.joshuagleitze.test.spek.testfiles.testFiles
+import de.joshuagleitze.testfiles.spek.testFiles
 import de.joshuagleitze.test.tasks
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
