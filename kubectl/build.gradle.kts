@@ -58,7 +58,7 @@ dependencies {
 	generatorImplementation(name = "ktor-client-cio", version = ktorVersion, group = "io.ktor")
 	generatorImplementation(name = "ktor-client-logging", version = ktorVersion, group = "io.ktor")
 	generatorImplementation(name = "ktor-client-serialization", version = ktorVersion, group = "io.ktor")
-	generatorImplementation(name = "jansi", version = "2.3.0", group = "org.fusesource.jansi")
+	generatorImplementation(name = "jansi", version = "2.3.1", group = "org.fusesource.jansi")
 
 	generatedImplementation(data.output)
 
