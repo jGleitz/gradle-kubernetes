@@ -40,7 +40,7 @@ dependencies {
 	implementation(name = "commons-io", version = "2.8.0", group = "commons-io")
 	implementation(name = "string-notation", version = "1.4.0", group = "de.joshuagleitze")
 	implementation(name = "kotlinx-serialization-json", group = "org.jetbrains.kotlinx", version = "1.0.1")
-	implementation(name = "kaml", group = "com.charleskorn.kaml", version = "0.27.0")
+	implementation(name = "kaml", group = "com.charleskorn.kaml", version = "0.28.0")
 
 	testImplementation(testFixtures(project(":common")))
 	testImplementation(name = "spek-dsl-jvm", version = spekVersion, group = "org.spekframework.spek2")
