@@ -14,7 +14,7 @@ dependencies {
 	testFixturesImplementation(gradleApi())
 	testFixturesImplementation(gradleTestKit())
 	testFixturesImplementation(name = "spek-dsl-jvm", version = spekVersion, group = "org.spekframework.spek2")
-	testFixturesImplementation(name = "atrium-fluent-en_GB", version = "0.15.0", group = "ch.tutteli.atrium")
+	testFixturesImplementation(name = "atrium-fluent-en_GB", version = "0.16.0", group = "ch.tutteli.atrium")
 
 	constraints {
 		testFixturesImplementation(kotlin("reflect", version = KotlinCompilerVersion.VERSION))
