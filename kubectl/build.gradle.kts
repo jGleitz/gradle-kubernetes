@@ -29,7 +29,7 @@ val generatedImplementation = configurations[generated.implementationConfigurati
 
 dependencies {
 	val spekVersion = "2.0.15"
-	val ktorVersion = "1.5.3"
+	val ktorVersion = "1.5.4"
 
 	implementation(data.output)
 	api(generated.output)
