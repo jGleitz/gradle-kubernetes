@@ -2,15 +2,14 @@ package de.joshuagleitze.gradle.kubectl.data
 
 import ch.tutteli.atrium.api.fluent.en_GB.containsExactly
 import ch.tutteli.atrium.api.fluent.en_GB.feature
-import ch.tutteli.atrium.api.fluent.en_GB.isEmpty
 import ch.tutteli.atrium.api.fluent.en_GB.messageContains
 import ch.tutteli.atrium.api.fluent.en_GB.toThrow
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.gradle.kubectl.asList
 import de.joshuagleitze.test.describeType
-import org.spekframework.spek2.Spek
+import io.kotest.core.spec.style.DescribeSpec
 
-object SelectorSpec: Spek({
+class SelectorSpec : DescribeSpec({
 	describeType<LabelSelector> {
 		it("generates the --selector option") {
 			expect(LabelSelector("a" to "1", "b" to "2", "c" to "3"))

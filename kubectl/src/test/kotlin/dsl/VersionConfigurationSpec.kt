@@ -8,13 +8,14 @@ import de.joshuagleitze.test.forGradleTest
 import de.joshuagleitze.test.gradle.output
 import de.joshuagleitze.test.gradle.task
 import de.joshuagleitze.test.gradle.wasSuccessful
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import io.kotest.core.spec.style.DescribeSpec
 import kotlin.io.path.*
 
-object VersionConfigurationSpec: Spek({
+class VersionConfigurationSpec: DescribeSpec({
+	timeout = forGradleTest()
+
 	describe("version configuration") {
-		beforeEachTest(integrationTestProject::prepare)
+		beforeEach { integrationTestProject.prepare() }
 
 		val logVersionTask =
 			"""
@@ -27,7 +28,7 @@ object VersionConfigurationSpec: Spek({
 			""".trimIndent()
 
 		describe("Kotlin") {
-			it("allows to set the kubectl version", timeout = forGradleTest()) {
+			it("allows to set the kubectl version") {
 				(integrationTestProject.projectDir / "build.gradle.kts").writeText(
 					"""
 					import ${KubectlVersion::class.qualifiedName}.V1_16_7
@@ -50,7 +51,7 @@ object VersionConfigurationSpec: Spek({
 		}
 
 		describe("Groovy") {
-			it("allows to set the kubectl version", timeout = forGradleTest()) {
+			it("allows to set the kubectl version") {
 				(integrationTestProject.projectDir /"build.gradle").writeText(
 					"""
 					import static ${KubectlVersion::class.qualifiedName}.V1_16_7

@@ -16,6 +16,8 @@ import de.joshuagleitze.test.GradleIntegrationTestProject.integrationTestProject
 import de.joshuagleitze.test.describeType
 import de.joshuagleitze.test.forGradleTest
 import de.joshuagleitze.test.gradle.output
+import io.kotest.core.spec.IsolationMode.InstancePerTest
+import io.kotest.core.spec.style.DescribeSpec
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.plugins.PluginContainer
@@ -23,18 +25,16 @@ import org.gradle.api.tasks.TaskContainer
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.findPlugin
 import org.gradle.testfixtures.ProjectBuilder
-import org.spekframework.spek2.Spek
 import kotlin.io.path.*
-import kotlin.time.seconds
 
-object KubectlPluginSpec: Spek({
-	val testProject by memoized {
-		ProjectBuilder.builder().build()
-			.also { it.plugins.apply(KubectlPlugin::class) }
-	}
+class KubectlPluginSpec : DescribeSpec({
+	isolationMode = InstancePerTest
+
+	val testProject = ProjectBuilder.builder().build()
+		.also { it.plugins.apply(KubectlPlugin::class) }
 
 	describeType<KubectlPlugin> {
-		it("registers the ${KubernetesExtension.NAME} plugin", timeout = 20.seconds.toLongMilliseconds() /* for CI */) {
+		it("registers the ${KubernetesExtension.NAME} plugin") {
 			expect(testProject) {
 				feature(Project::getPlugins)
 					.feature(PluginContainer::findPlugin, KubernetesPlugin::class)
@@ -76,9 +76,11 @@ object KubectlPluginSpec: Spek({
 		}
 
 		describe("gradle compatibility") {
-			beforeEachTest(integrationTestProject::prepare)
+			timeout = forGradleTest()
 
-			it("can be used together with the configuration cache", timeout = forGradleTest()) {
+			beforeEach { integrationTestProject.prepare() }
+
+			it("can be used together with the configuration cache") {
 				(integrationTestProject.projectDir / "build.gradle.kts").writeText(
 					"""
 					plugins {

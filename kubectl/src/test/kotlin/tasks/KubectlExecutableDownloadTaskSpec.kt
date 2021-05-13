@@ -1,13 +1,6 @@
 package de.joshuagleitze.gradle.kubectl.tasks
 
-import ch.tutteli.atrium.api.fluent.en_GB.contains
-import ch.tutteli.atrium.api.fluent.en_GB.extension
-import ch.tutteli.atrium.api.fluent.en_GB.feature
-import ch.tutteli.atrium.api.fluent.en_GB.isA
-import ch.tutteli.atrium.api.fluent.en_GB.messageContains
-import ch.tutteli.atrium.api.fluent.en_GB.notToThrow
-import ch.tutteli.atrium.api.fluent.en_GB.toBe
-import ch.tutteli.atrium.api.fluent.en_GB.toThrow
+import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.gradle.kubectl.KubectlVersion.V1
 import de.joshuagleitze.gradle.kubectl.KubectlVersion.V1_17_6
@@ -16,51 +9,45 @@ import de.joshuagleitze.gradle.kubectl.tasks.KubectlExecutableDownloadTask.Compa
 import de.joshuagleitze.test.describeType
 import de.joshuagleitze.test.getAsPath
 import de.undercouch.gradle.tasks.download.DownloadAction
-import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.spyk
-import io.mockk.unmockkAll
+import io.kotest.core.spec.IsolationMode.InstancePerTest
+import io.kotest.core.spec.style.DescribeSpec
+import io.mockk.*
 import org.gradle.api.Task
 import org.gradle.kotlin.dsl.create
 import org.gradle.nativeplatform.platform.internal.Architectures
-import org.gradle.nativeplatform.platform.internal.Architectures.ARM_V7
-import org.gradle.nativeplatform.platform.internal.Architectures.IA_64
-import org.gradle.nativeplatform.platform.internal.Architectures.X86
-import org.gradle.nativeplatform.platform.internal.Architectures.X86_64
+import org.gradle.nativeplatform.platform.internal.Architectures.*
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.gradle.nativeplatform.platform.internal.DefaultOperatingSystem
 import org.gradle.testfixtures.ProjectBuilder
-import org.spekframework.spek2.Spek
 import java.io.File
 import java.net.URL
 import kotlin.io.path.Path
 
-object KubectlExecutableDownloadTaskSpec: Spek({
-	describeType<KubectlExecutableDownloadTaskSpec> {
-		val testProject by memoized { ProjectBuilder.builder().build() }
-		val downloadAction by memoized {
-			spyk(DownloadAction(testProject)) {
-				every { execute() } returns Unit
-				every { isUpToDate } returns false
-			}
-		}
+class KubectlExecutableDownloadTaskSpec : DescribeSpec({
+	isolationMode = InstancePerTest
+	val testProject = ProjectBuilder.builder().build()
+	lateinit var downloadAction: DownloadAction
 
-		beforeGroup {
-			mockkStatic(DefaultNativePlatform::class)
-			mockkObject(KubectlExecutableDownloadTask)
+	beforeContainer {
+		mockkStatic(DefaultNativePlatform::class)
+		mockkObject(KubectlExecutableDownloadTask)
+	}
+	afterContainer { unmockkAll() }
+	beforeEach {
+		downloadAction = object : DownloadAction(testProject) {
+			override fun execute() {}
+			override fun isUpToDate() = false
 		}
-		beforeEachTest {
-			every { any<Task>().createDownloadAction() } returns downloadAction
-		}
-		afterGroup { unmockkAll() }
+		every { any<Task>().createDownloadAction() } returns downloadAction
+	}
 
+	describeType<KubectlExecutableDownloadTask> {
 		fun createKubectlDownloadTestTask() =
 			testProject.tasks.create("testDownload", KubectlExecutableDownloadTask::class) {
 				it.kubectlRelease.set(V1)
 			}
 
-		fun mockPlatform(osName: String, architecture: Architectures.KnownArchitecture) {
+		fun mockPlatform(osName: String, architecture: KnownArchitecture) {
 			every { DefaultNativePlatform.host() }
 				.returns(DefaultNativePlatform("test", DefaultOperatingSystem(osName), Architectures.of(architecture)))
 		}

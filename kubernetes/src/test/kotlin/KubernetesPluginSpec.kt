@@ -7,6 +7,8 @@ import de.joshuagleitze.gradle.kubernetes.dsl.KubernetesExtension
 import de.joshuagleitze.gradle.kubernetes.dsl.KubernetesExtension.Companion.kubernetes
 import de.joshuagleitze.gradle.kubernetes.dsl.MultiClusterKubernetesDeployment
 import de.joshuagleitze.test.describeType
+import io.kotest.core.spec.IsolationMode.InstancePerLeaf
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.confirmVerified
 import io.mockk.excludeRecords
 import io.mockk.mockk
@@ -15,16 +17,17 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.kotlin.dsl.apply
 import org.gradle.testfixtures.ProjectBuilder
-import org.spekframework.spek2.Spek
 import kotlin.time.seconds
 
-object KubernetesPluginSpec: Spek({
-	val testProject by memoized {
-		(ProjectBuilder.builder().build() as ProjectInternal)
-			.also { it.plugins.apply(KubernetesPlugin::class) }
-	}
+class KubernetesPluginSpec : DescribeSpec({
+	isolationMode = InstancePerLeaf
+	timeout = 20.seconds.toLongMilliseconds() /* for CI */
+
+	val testProject = (ProjectBuilder.builder().build() as ProjectInternal)
+		.also { it.plugins.apply(KubernetesPlugin::class) }
+
 	describeType<KubernetesPlugin> {
-		it("registers the ${KubernetesExtension.NAME} extension", timeout = 20.seconds.toLongMilliseconds() /* for CI */) {
+		it("registers the ${KubernetesExtension.NAME} extension") {
 			expect(testProject.extensions)
 				.feature(ExtensionContainer::findByName, KubernetesExtension.NAME)
 				.isA<KubernetesExtension>()
@@ -32,8 +35,7 @@ object KubernetesPluginSpec: Spek({
 
 		it(
 			"calls ${MultiClusterKubernetesDeployment::class.simpleName}.${MultiClusterKubernetesDeployment<*>::afterProjectEvaluated.name} " +
-				"after the project has been evaluated",
-			timeout = 20.seconds.toLongMilliseconds() /* for CI */
+					"after the project has been evaluated"
 		) {
 			val mockDeployment = mockk<MultiClusterKubernetesDeployment<*>>(relaxed = true) {
 				excludeRecords { name }

@@ -1,17 +1,16 @@
 package de.joshuagleitze.gradle.kubectl.output
 
-import ch.tutteli.atrium.api.fluent.en_GB.contains
 import ch.tutteli.atrium.api.fluent.en_GB.feature
 import ch.tutteli.atrium.api.fluent.en_GB.toBe
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.test.describeType
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.spyk
 import io.mockk.verify
-import org.spekframework.spek2.Spek
 import java.io.ByteArrayOutputStream
-import java.nio.file.Path
 
-object LineFilterSpec: Spek({
+@Suppress("BlockingMethodInNonBlockingContext")
+class LineFilterSpec : DescribeSpec({
 	describeType<LineFilter> {
 		it("writes a ByteArray through to the target stream") {
 			val targetStream = ByteArrayOutputStream()

@@ -4,9 +4,9 @@ import ch.tutteli.atrium.api.fluent.en_GB.messageContains
 import ch.tutteli.atrium.api.fluent.en_GB.toThrow
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.test.describeType
-import org.spekframework.spek2.Spek
+import io.kotest.core.spec.style.DescribeSpec
 
-object KubernetesClusterConnectionSpec: Spek({
+class KubernetesClusterConnectionSpec : DescribeSpec({
 	describeType<KubeconfigContext> {
 		it("rejects being created with an empty context name") {
 			expect {

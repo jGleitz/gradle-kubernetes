@@ -1,12 +1,6 @@
 package de.joshuagleitze.gradle.kubectl.tasks
 
-import ch.tutteli.atrium.api.fluent.en_GB.contains
-import ch.tutteli.atrium.api.fluent.en_GB.containsNot
-import ch.tutteli.atrium.api.fluent.en_GB.feature
-import ch.tutteli.atrium.api.fluent.en_GB.get
-import ch.tutteli.atrium.api.fluent.en_GB.isNotEmpty
-import ch.tutteli.atrium.api.fluent.en_GB.notToBeNull
-import ch.tutteli.atrium.api.fluent.en_GB.toBe
+import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.gradle.kubectl.KubectlPlugin
 import de.joshuagleitze.gradle.kubectl.action.KubectlAction
@@ -16,25 +10,30 @@ import de.joshuagleitze.gradle.kubectl.tasks.DeployTask.DEPLOYMENT_TASK_GROUP
 import de.joshuagleitze.gradle.kubernetes.data.KubeconfigContext
 import de.joshuagleitze.test.describeType
 import de.joshuagleitze.test.get
-import de.joshuagleitze.testfiles.spek.testFiles
+import de.joshuagleitze.testfiles.kotest.testFiles
+import io.kotest.core.spec.IsolationMode.InstancePerTest
+import io.kotest.core.spec.style.DescribeSpec
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.kotlin.dsl.apply
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.workers.WorkerExecutor
-import org.spekframework.spek2.Spek
-import java.util.LinkedList
+import java.util.*
 
-object KubectlApplyTaskSpec: Spek({
-	val testFiles = testFiles()
-	val testProject by memoized {
-		ProjectBuilder.builder()
+class KubectlApplyTaskSpec : DescribeSpec({
+	isolationMode = InstancePerTest
+
+	val createdParameters = LinkedList<KubectlAction.Parameters>()
+	lateinit var testProject: Project
+	lateinit var mockWorkerExecutor: WorkerExecutor
+
+	beforeEach {
+		testProject = ProjectBuilder.builder()
 			.withProjectDir(testFiles.createDirectory("testProject").toFile())
 			.build()
 			.also { it.plugins.apply(KubectlPlugin::class) }
+		mockWorkerExecutor = testProject.mockWorkerExecutorFor(KubectlAction::class, createdParameters)
 	}
-	val createdParameters by memoized { LinkedList<KubectlAction.Parameters>() }
-	val mockWorkerExecutor by memoized { testProject.mockWorkerExecutorFor(KubectlAction::class, createdParameters) }
 
 	fun registerKubectlApplyTask(
 		name: String,
@@ -59,7 +58,7 @@ object KubectlApplyTaskSpec: Spek({
 		}
 
 		it("sets the --kustomize option") {
-            val testKustomizationDir = testFiles.createDirectory("kustomization")
+			val testKustomizationDir = testFiles.createDirectory("kustomization")
 			registerKubectlApplyTask("kustomizationOption") {
 				kustomizationDir.set(testKustomizationDir.toFile())
 			}.apply()
@@ -126,10 +125,10 @@ object KubectlApplyTaskSpec: Spek({
 	}
 
 	include(
-		object: KubectlTaskSpec<KubectlApplyTask>(
+		kubectlTaskSpec(
 			testProject = { testProject },
 			createTask = { name, workerExecutor -> registerKubectlApplyTask(name, this, workerExecutor) },
 			execute = { apply() }
-		) {}
+		)
 	)
 })

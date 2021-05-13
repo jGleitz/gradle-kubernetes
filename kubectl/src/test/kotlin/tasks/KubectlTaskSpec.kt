@@ -1,11 +1,6 @@
 package de.joshuagleitze.gradle.kubectl.tasks
 
-import ch.tutteli.atrium.api.fluent.en_GB.contains
-import ch.tutteli.atrium.api.fluent.en_GB.feature
-import ch.tutteli.atrium.api.fluent.en_GB.isSameAs
-import ch.tutteli.atrium.api.fluent.en_GB.messageContains
-import ch.tutteli.atrium.api.fluent.en_GB.toBe
-import ch.tutteli.atrium.api.fluent.en_GB.toThrow
+import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.gradle.kubectl.action.KubectlAction
 import de.joshuagleitze.gradle.kubectl.action.mockWorkerExecutorFor
@@ -16,24 +11,25 @@ import de.joshuagleitze.gradle.kubernetes.data.KubernetesClusterConnection
 import de.joshuagleitze.test.dependencies
 import de.joshuagleitze.test.get
 import de.joshuagleitze.test.getAsFile
-import de.joshuagleitze.testfiles.spek.testFiles
+import de.joshuagleitze.testfiles.kotest.testFiles
+import io.kotest.core.spec.style.describeSpec
 import io.mockk.confirmVerified
 import org.gradle.api.Project
 import org.gradle.workers.WorkerExecutor
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
-import java.io.File
-import java.util.LinkedList
+import java.util.*
 
-abstract class KubectlTaskSpec<KubectlTaskType: KubectlTask>(
+fun <KubectlTaskType : KubectlTask> kubectlTaskSpec(
 	testProject: () -> Project,
 	createTask: Project.(name: String, workerExecutor: WorkerExecutor) -> KubectlTaskType,
 	execute: KubectlTaskType.() -> Unit
-): Spek({
-    val testFiles = testFiles()
-	val createdParameters by memoized { LinkedList<KubectlAction.Parameters>() }
-	val mockWorkerExecutor by memoized { testProject().mockWorkerExecutorFor(KubectlAction::class, createdParameters) }
+) = describeSpec {
+	val createdParameters = LinkedList<KubectlAction.Parameters>()
+	lateinit var mockWorkerExecutor: WorkerExecutor
 	fun newTask(name: String) = testProject().createTask(name, mockWorkerExecutor)
+
+	beforeEach {
+		mockWorkerExecutor = testProject().mockWorkerExecutorFor(KubectlAction::class, createdParameters)
+	}
 
 	describe("${KubectlTask::class.simpleName} functionality") {
 		it("rejects being executed without a configured cluster") {
@@ -100,4 +96,4 @@ abstract class KubectlTaskSpec<KubectlTaskType: KubectlTask>(
 				.toBe(true)
 		}
 	}
-})
+}

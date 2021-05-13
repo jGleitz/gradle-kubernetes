@@ -73,9 +73,7 @@ public open class KubectlExecutableDownloadTask: DefaultTask() {
 		public const val NAME: String = "downloadKubectl"
 		public const val DOWNLOAD_TARGET_DIR: String = "bin/kubectl"
 		public val TaskContainer.downloadKubectl: TaskProvider<KubectlExecutableDownloadTask>
-			get() = named<KubectlExecutableDownloadTask>(
-				NAME
-			)
+			get() = named<KubectlExecutableDownloadTask>(NAME)
 
 		internal fun Task.createDownloadAction() = DownloadAction(project, this)
 	}
