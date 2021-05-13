@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 import java.io.Closeable
 
-class GitHubApi: Closeable {
+class GitHubApi : Closeable {
 	val client = HttpClient(CIO) {
 		expectSuccess = true
 		install(Logging) {
@@ -46,9 +46,9 @@ class GitHubApi: Closeable {
 		require(pageSize <= MAX_PAGE_SIZE) {
 			"The page size must not exceed $MAX_PAGE_SIZE (was $pageSize)!"
 		}
-		var nextTarget: (URLBuilder.() -> Unit)? = {
-			path(path)
-			parameters["per_page"] = pageSize.toString()
+		var nextTarget: ((URLBuilder) -> Unit)? = {
+			it.path(path)
+			it.parameters["per_page"] = pageSize.toString()
 		}
 		while (nextTarget != null) {
 			val target = nextTarget
@@ -58,7 +58,7 @@ class GitHubApi: Closeable {
 			}
 			emit(result.receive<List<T>>().asFlow())
 			nextTarget = getNextPageUrl(result)
-				?.let { nextUrl -> { takeFrom(nextUrl) } }
+				?.let { nextUrl -> { url: URLBuilder -> url.takeFrom(nextUrl) } }
 		}
 	}
 		.flattenConcat()

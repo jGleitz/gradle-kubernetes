@@ -1,5 +1,5 @@
 plugins {
-	kotlin("jvm") version "1.4.20" apply false
+	kotlin("jvm") version "1.4.32" apply false
 	id("com.palantir.git-version") version "0.12.3"
 }
 
@@ -9,7 +9,7 @@ status = if (isSnapshot) "snapshot" else "release"
 
 allprojects {
 	repositories {
-		jcenter()
+		mavenCentral()
 	}
 }
 

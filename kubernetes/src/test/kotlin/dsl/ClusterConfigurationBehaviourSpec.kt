@@ -6,17 +6,16 @@ import de.joshuagleitze.gradle.kubernetes.KubernetesPlugin
 import de.joshuagleitze.gradle.kubernetes.dsl.KubernetesExtension.Companion.kubernetes
 import de.joshuagleitze.test.findByName
 import de.joshuagleitze.test.tasks
+import io.kotest.core.spec.IsolationMode
+import io.kotest.core.spec.style.DescribeSpec
 import org.gradle.kotlin.dsl.apply
 import org.gradle.testfixtures.ProjectBuilder
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 
-object ClusterConfigurationBehaviourSpec: Spek({
-	val testProject by memoized {
-		ProjectBuilder.builder().build().also { it.plugins.apply(KubernetesPlugin::class) }
-	}
+class ClusterConfigurationBehaviourSpec : DescribeSpec({
+	isolationMode = IsolationMode.InstancePerLeaf
+	val testProject = ProjectBuilder.builder().build().also { it.plugins.apply(KubernetesPlugin::class) }
 
-	beforeEachTest {
+	beforeEach {
 		testProject.kubernetes.apply {
 			cluster("dev") {
 				it.kubeconfigContext("test-dev")

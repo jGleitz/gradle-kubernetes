@@ -2,29 +2,23 @@ package de.joshuagleitze.gradle.kubernetes.dsl
 
 import ch.tutteli.atrium.api.fluent.en_GB.contains
 import ch.tutteli.atrium.api.verbs.expect
-import de.joshuagleitze.gradle.kubernetes.data.BasicAuth
-import de.joshuagleitze.gradle.kubernetes.data.KubeconfigCluster
-import de.joshuagleitze.gradle.kubernetes.data.KubeconfigContext
-import de.joshuagleitze.gradle.kubernetes.data.KubeconfigUser
-import de.joshuagleitze.gradle.kubernetes.data.KubernetesApiServer
-import de.joshuagleitze.gradle.kubernetes.data.KubernetesCluster
-import de.joshuagleitze.gradle.kubernetes.data.NoAuth
+import de.joshuagleitze.gradle.kubernetes.data.*
 import de.joshuagleitze.test.GradleIntegrationTestProject.integrationTestProject
 import de.joshuagleitze.test.forGradleTest
 import de.joshuagleitze.test.gradle.output
 import de.joshuagleitze.test.gradle.task
 import de.joshuagleitze.test.gradle.wasSuccessful
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import io.kotest.core.spec.style.DescribeSpec
 import java.net.URI
-import kotlin.io.path.*
+import kotlin.io.path.writeText
 
-object KotlinClusterConfigurationSpec: Spek({
+class KotlinClusterConfigurationSpec : DescribeSpec({
 	describe("cluster configuration") {
-		beforeEachTest(integrationTestProject::prepare)
+		timeout = forGradleTest()
+		beforeEach { integrationTestProject.prepare() }
 
 		describe("Kotlin") {
-			it("allows to configure the default cluster with a kubeconfig context", timeout = forGradleTest()) {
+			it("allows to configure the default cluster with a kubeconfig context") {
 				integrationTestProject.projectDir.resolve("build.gradle.kts").writeText(
 					"""
 					plugins {
@@ -45,7 +39,7 @@ object KotlinClusterConfigurationSpec: Spek({
 				}
 			}
 
-			it("allows to configure a named cluster with a kubeconfig cluster", timeout = forGradleTest()) {
+			it("allows to configure a named cluster with a kubeconfig cluster") {
 				integrationTestProject.projectDir.resolve("build.gradle.kts").writeText(
 					"""
 					plugins {
@@ -66,10 +60,7 @@ object KotlinClusterConfigurationSpec: Spek({
 				}
 			}
 
-			it(
-				"allows to configure the default cluster with a kubeconfig cluster and kubeconfig user",
-				timeout = forGradleTest()
-			) {
+			it("allows to configure the default cluster with a kubeconfig cluster and kubeconfig user") {
 				integrationTestProject.projectDir.resolve("build.gradle.kts").writeText(
 					"""
 					plugins {
@@ -92,10 +83,7 @@ object KotlinClusterConfigurationSpec: Spek({
 				}
 			}
 
-			it(
-				"allows to configure a named cluster with an api server, certificate authority and basic auth",
-				timeout = forGradleTest()
-			) {
+			it("allows to configure a named cluster with an api server, certificate authority and basic auth") {
 				integrationTestProject.projectDir.resolve("build.gradle.kts").writeText(
 					"""
 					plugins {

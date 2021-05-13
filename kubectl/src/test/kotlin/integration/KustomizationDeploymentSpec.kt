@@ -5,28 +5,31 @@ import ch.tutteli.atrium.api.fluent.en_GB.containsNot
 import ch.tutteli.atrium.api.fluent.en_GB.exactly
 import ch.tutteli.atrium.api.fluent.en_GB.value
 import ch.tutteli.atrium.api.verbs.expect
-import de.joshuagleitze.gradle.kubectl.integration.KustomizationDeploymentSpec.ifMinikubeTestDisabled
 import de.joshuagleitze.gradle.kubectl.tasks.KubectlExecutableVerificationTask
 import de.joshuagleitze.test.GradleIntegrationTestProject.integrationTestProject
 import de.joshuagleitze.test.forGradleTest
 import de.joshuagleitze.test.forMinikubeTest
 import de.joshuagleitze.test.gradle.output
 import de.joshuagleitze.test.gradle.task
-import de.joshuagleitze.test.gradle.wasInvoked
 import de.joshuagleitze.test.gradle.wasSuccessful
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.dsl.Skip
-import org.spekframework.spek2.style.specification.describe
+import io.kotest.core.annotation.EnabledCondition
+import io.kotest.core.annotation.EnabledIf
+import io.kotest.core.spec.Spec
+import io.kotest.core.spec.style.DescribeSpec
 import kotlin.io.path.*
-import kotlin.time.seconds
+import kotlin.reflect.KClass
 
-object KustomizationDeploymentSpec: Spek({
-	describe("kustomization deployment", skip = ifMinikubeTestDisabled()) {
-		val minikube = Minikube.use()
-		beforeGroup(minikube::awaitStart)
-		afterGroup(minikube::stop)
-		beforeEachTest(integrationTestProject::prepare)
+val minikube = Minikube.use()
 
+@EnabledIf(MinikubeTestsEnabled::class)
+class KustomizationDeploymentSpec: DescribeSpec({
+	timeout = forMinikubeTest() + forGradleTest()
+
+	beforeContainer { minikube.awaitStart() }
+	afterContainer { minikube.stop() }
+	beforeEach { integrationTestProject.prepare() }
+
+	describe("kustomization deployment") {
 		fun setupKustomizationHelloWorldProject() {
 			// example from https://github.com/kubernetes-sigs/kustomize/tree/master/examples/helloWorld
 			with(integrationTestProject) {
@@ -125,7 +128,7 @@ object KustomizationDeploymentSpec: Spek({
 			}
 		}
 
-		it("deploys the kustomization hello world example", timeout = forMinikubeTest() + forGradleTest()) {
+		it("deploys the kustomization hello world example") {
 			setupKustomizationHelloWorldProject()
 			val result = integrationTestProject.runGradle(":deploy")
 
@@ -149,7 +152,7 @@ object KustomizationDeploymentSpec: Spek({
 			}
 		}
 
-		it("tears down the kustomization hello world example", timeout = forMinikubeTest() + forGradleTest()) {
+		it("tears down the kustomization hello world example") {
 			setupKustomizationHelloWorldProject()
 			integrationTestProject.runGradle(":deploy")
 
@@ -174,8 +177,8 @@ object KustomizationDeploymentSpec: Spek({
 			}
 		}
 	}
-}) {
-	fun ifMinikubeTestDisabled() =
-		if (System.getenv("DISABLE_MINIKUBE_TEST") == "true") Skip.Yes("DISABLE_MINIKUBE_TEST is set")
-		else Skip.No
+})
+
+class MinikubeTestsEnabled : EnabledCondition {
+	override fun enabled(specKlass: KClass<out Spec>) = System.getenv("DISABLE_MINIKUBE_TEST") != "true"
 }

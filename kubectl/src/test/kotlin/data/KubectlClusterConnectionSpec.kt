@@ -5,28 +5,16 @@ import ch.tutteli.atrium.api.fluent.en_GB.feature
 import ch.tutteli.atrium.api.fluent.en_GB.isEmpty
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.gradle.kubectl.asList
-import de.joshuagleitze.gradle.kubernetes.data.BasicAuth
-import de.joshuagleitze.gradle.kubernetes.data.KubeconfigCluster
-import de.joshuagleitze.gradle.kubernetes.data.KubeconfigContext
-import de.joshuagleitze.gradle.kubernetes.data.KubeconfigUser
-import de.joshuagleitze.gradle.kubernetes.data.KubernetesApiServer
-import de.joshuagleitze.gradle.kubernetes.data.KubernetesApiServerOptions
-import de.joshuagleitze.gradle.kubernetes.data.KubernetesAuthOptions
-import de.joshuagleitze.gradle.kubernetes.data.KubernetesCluster
-import de.joshuagleitze.gradle.kubernetes.data.KubernetesClusterConnection
-import de.joshuagleitze.gradle.kubernetes.data.NoAuth
+import de.joshuagleitze.gradle.kubernetes.data.*
 import de.joshuagleitze.test.describeType
-import de.joshuagleitze.testfiles.spek.testFiles
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.lifecycle.CachingMode
-import org.spekframework.spek2.lifecycle.CachingMode.SCOPE
+import de.joshuagleitze.testfiles.kotest.testFiles
+import io.kotest.core.spec.style.DescribeSpec
 import java.io.File
 import java.net.URI
 import java.nio.file.Path
 
-object KubectlClusterConnectionSpec: Spek({
-    val testFiles = testFiles()
-    val certificate by memoized(SCOPE) { testFiles.createFile("certificate") }
+class KubectlClusterConnectionSpec : DescribeSpec({
+	val certificate = testFiles.createFile("certificate")
 
 	describeType<KubeconfigContext> {
 		it("generates the --context option") {

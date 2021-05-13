@@ -1,40 +1,36 @@
 package de.joshuagleitze.gradle.kubectl.action
 
-import ch.tutteli.atrium.api.fluent.en_GB.contains
-import ch.tutteli.atrium.api.fluent.en_GB.containsExactly
-import ch.tutteli.atrium.api.fluent.en_GB.containsNot
-import ch.tutteli.atrium.api.fluent.en_GB.feature
-import ch.tutteli.atrium.api.fluent.en_GB.isRegularFile
-import ch.tutteli.atrium.api.fluent.en_GB.toBe
+import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.test.describeType
 import de.joshuagleitze.test.instantiator
-import de.joshuagleitze.testfiles.spek.testFiles
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.excludeRecords
-import io.mockk.spyk
-import io.mockk.verify
+import de.joshuagleitze.testfiles.kotest.testFiles
+import io.kotest.core.spec.IsolationMode
+import io.kotest.core.spec.IsolationMode.InstancePerTest
+import io.kotest.core.spec.style.DescribeSpec
+import io.mockk.*
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
 import org.gradle.testfixtures.ProjectBuilder
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.lifecycle.CachingMode.SCOPE
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintStream
-import java.util.LinkedList
+import java.nio.file.Path
+import java.util.*
 import kotlin.io.path.*
 
-object KubectlActionSpec: Spek({
-	val testFiles = testFiles()
-	val testProject by memoized(SCOPE) { ProjectBuilder.builder().build() }
-	val reportsDir by memoized { testFiles.createDirectory("reports") }
-	val createdExecSpecs by memoized(SCOPE) { LinkedList<ExecSpec>() }
-	val mockExecOperations by memoized(SCOPE) { mockExecOperations(createdExecSpecs) }
+class KubectlActionSpec : DescribeSpec({
+	isolationMode = InstancePerTest
 
-	beforeEachTest { createdExecSpecs.clear() }
+	val testProject = ProjectBuilder.builder().build()
+	lateinit var reportsDir: Path
+	val createdExecSpecs = LinkedList<ExecSpec>()
+	val mockExecOperations = mockExecOperations(createdExecSpecs)
+
+	beforeEach {
+		reportsDir = testFiles.createDirectory("reports")
+	}
 
 	fun testKubectlAction(
 		standardOutput: OutputStream? = null,
@@ -112,7 +108,7 @@ object KubectlActionSpec: Spek({
 			}
 
 			it("prints the standard output to the log file") {
-				val targetLogFile = reportsDir / "kubectl" /"test.log"
+				val targetLogFile = reportsDir / "kubectl" / "test.log"
 				val testAction = testKubectlAction {
 					logFile.set(targetLogFile.toFile())
 				}
@@ -161,7 +157,7 @@ object KubectlActionSpec: Spek({
 			}
 
 			it("prints the error output to the log file") {
-				val targetLogFile = reportsDir / "kubectl" /"test.log"
+				val targetLogFile = reportsDir / "kubectl" / "test.log"
 				val testAction = testKubectlAction {
 					logFile.set(targetLogFile.toFile())
 				}
@@ -291,7 +287,7 @@ object KubectlActionSpec: Spek({
 				verify {
 					testStandardOutput.close()
 				}
-					confirmVerified(testStandardOutput)
+				confirmVerified(testStandardOutput)
 			}
 
 			it("closes the errorOutput stream") {
@@ -372,7 +368,7 @@ object KubectlActionSpec: Spek({
 		execOperations: ExecOperations,
 		standardOutput: OutputStream?,
 		errorOutput: OutputStream?
-	): KubectlAction(execOperations) {
+	) : KubectlAction(execOperations) {
 		override fun getParameters() = parameters
 		override val standardOutput = standardOutput ?: super.standardOutput
 		override val errorOutput = errorOutput ?: super.errorOutput

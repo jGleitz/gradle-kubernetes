@@ -12,22 +12,14 @@ import de.joshuagleitze.gradle.kubectl.tasks.KubectlExecutableVerificationTask
 import de.joshuagleitze.test.GradleIntegrationTestProject.integrationTestProject
 import de.joshuagleitze.test.clearIfExists
 import de.joshuagleitze.test.forGradleTest
-import de.joshuagleitze.test.gradle.failed
-import de.joshuagleitze.test.gradle.output
-import de.joshuagleitze.test.gradle.task
-import de.joshuagleitze.test.gradle.wasInvoked
-import de.joshuagleitze.test.gradle.wasSuccessful
-import de.joshuagleitze.test.gradle.wasUpToDate
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
-import java.nio.file.Files
-import java.nio.file.Files.createDirectories
-import java.nio.file.Files.move
+import de.joshuagleitze.test.gradle.*
+import io.kotest.core.spec.style.DescribeSpec
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
-import java.nio.file.StandardOpenOption.APPEND
 import kotlin.io.path.*
 
-object DownloadAndVerifySpec: Spek({
+class DownloadAndVerifySpec : DescribeSpec({
+	timeout = forGradleTest()
+
 	val osSystemProperty = System.getProperty("os.name").toLowerCase()
 	val executableName = if (osSystemProperty.contains("win")) "kubectl.exe" else "kubectl"
 	val osName = when {
@@ -40,12 +32,12 @@ object DownloadAndVerifySpec: Spek({
 	val binBackupDir = binDir.resolveSibling("${binDir.fileName}.bkp")
 
 	describe("download & verify") {
-		beforeGroup {
+		beforeContainer {
 			integrationTestProject.prepare()
 			binBackupDir.clearIfExists()
-			createDirectories(binDir)
+			binDir.createDirectories()
 			binDir.moveTo(binBackupDir)
-			(integrationTestProject.projectDir /"build.gradle.kts").writeText(
+			(integrationTestProject.projectDir / "build.gradle.kts").writeText(
 				"""
 				import ${KubectlVersion::class.fullName}.V1_18_6
 				plugins {
@@ -59,13 +51,13 @@ object DownloadAndVerifySpec: Spek({
 			)
 		}
 
-		afterGroup {
+		afterContainer {
 			binDir.clearIfExists()
 			binBackupDir.moveTo(binDir)
 		}
 
 		describe("download task") {
-			it("downloads kubectl to <gradle home>/bin/kubectl/<os>/<version>", timeout = forGradleTest()) {
+			it("downloads kubectl to <gradle home>/bin/kubectl/<os>/<version>") {
 				expect(integrationTestProject.runGradle(KubectlExecutableDownloadTask.NAME)) {
 					task(":${KubectlExecutableDownloadTask.NAME}").wasSuccessful()
 					output.contains(executableName)
@@ -76,7 +68,7 @@ object DownloadAndVerifySpec: Spek({
 					.isExecutable()
 			}
 
-			it("is up to date after being executed", timeout = forGradleTest()) {
+			it("is up to date after being executed") {
 				expect(integrationTestProject.runGradle(KubectlExecutableDownloadTask.NAME)) {
 					task(":${KubectlExecutableDownloadTask.NAME}").wasInvoked()
 				}
@@ -88,13 +80,13 @@ object DownloadAndVerifySpec: Spek({
 		}
 
 		describe("verify task") {
-			it("is executed and succeeds after downloading", timeout = forGradleTest()) {
+			it("is executed and succeeds after downloading") {
 				expect(integrationTestProject.runGradle(KubectlExecutableDownloadTask.NAME)) {
 					task(":${KubectlExecutableVerificationTask.NAME}").wasSuccessful()
 				}
 			}
 
-			it("fails when changing the downloaded file", timeout = forGradleTest()) {
+			it("fails when changing the downloaded file") {
 				expect(integrationTestProject.runGradle(KubectlExecutableDownloadTask.NAME)) {
 					task(":${KubectlExecutableVerificationTask.NAME}").wasSuccessful()
 				}

@@ -13,31 +13,34 @@ import de.joshuagleitze.gradle.kubernetes.dsl.KubernetesExtension
 import de.joshuagleitze.gradle.kubernetes.dsl.KubernetesExtension.Companion.kubernetes
 import de.joshuagleitze.test.findByName
 import de.joshuagleitze.test.get
-import de.joshuagleitze.test.getAsFile
 import de.joshuagleitze.test.getAsPath
-import de.joshuagleitze.testfiles.spek.testFiles
 import de.joshuagleitze.test.tasks
+import de.joshuagleitze.testfiles.kotest.testFiles
+import io.kotest.core.spec.IsolationMode.InstancePerTest
+import io.kotest.core.spec.style.DescribeSpec
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.kotlin.dsl.apply
 import org.gradle.testfixtures.ProjectBuilder
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import java.nio.file.Path
 import kotlin.io.path.*
 
-object KustomizationConfigurationSpec: Spek({
-	val testFiles = testFiles()
-	val testProjectDir by memoized { testFiles.createDirectory("projectDir") }
-	val testProject by memoized {
-		(ProjectBuilder.builder().withProjectDir(testProjectDir.toFile()).build() as ProjectInternal)
-			.also { it.plugins.apply(KubectlPlugin::class) }
+class KustomizationConfigurationSpec : DescribeSpec({
+	isolationMode = InstancePerTest
+	lateinit var testProjectDir: Path
+	lateinit var testProject: ProjectInternal
+
+	beforeTest {
+		testProjectDir = testFiles.createDirectory("projectDir")
+		testProject = ProjectBuilder.builder().withProjectDir(testProjectDir.toFile()).build() as ProjectInternal
+		testProject.plugins.apply(KubectlPlugin::class)
 	}
 
 	describe("kustomization configuration") {
 		it("adds a project folder kustomization for the default cluster") {
-			testProject.kubernetes.cluster{
+			testProject.kubernetes.cluster {
 				it.kubeconfigContext("test")
 			}
 			testProject.kubectl.kustomization(".")
@@ -76,7 +79,7 @@ object KustomizationConfigurationSpec: Spek({
 				cluster("integration") {
 					it.kubeconfigContext("test-integration")
 				}
-				cluster("production"){
+				cluster("production") {
 					it.kubeconfigContext("test-production")
 				}
 			}

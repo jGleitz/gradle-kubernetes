@@ -7,24 +7,26 @@ import ch.tutteli.atrium.api.fluent.en_GB.toBe
 import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.gradle.kubernetes.KubernetesPlugin
 import de.joshuagleitze.gradle.kubernetes.dsl.KubernetesExtension.Companion.kubernetes
-import de.joshuagleitze.test.dependencies
-import de.joshuagleitze.test.getByName
-import de.joshuagleitze.test.mustRunAfter
-import de.joshuagleitze.test.name
-import de.joshuagleitze.test.tasks
-import de.joshuagleitze.testfiles.spek.testFiles
+import de.joshuagleitze.test.*
+import de.joshuagleitze.testfiles.kotest.testFiles
+import io.kotest.core.spec.IsolationMode
+import io.kotest.core.spec.style.DescribeSpec
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.register
 import org.gradle.testfixtures.ProjectBuilder
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 
-object DeploymentConfigurationSpec: Spek({
-	val testFiles = testFiles()
-	val testProject by memoized {
-		(ProjectBuilder.builder().withProjectDir(testFiles.createDirectory("projectDir").toFile()).build() as ProjectInternal)
+class DeploymentConfigurationSpec : DescribeSpec({
+	isolationMode = IsolationMode.InstancePerTest
+
+	lateinit var testProject: ProjectInternal
+
+	beforeEach {
+		testProject = (ProjectBuilder.builder()
+			.withProjectDir(testFiles.createDirectory("projectDir").toFile())
+			.build() as ProjectInternal
+				)
 			.also {
 				it.plugins.apply(KubernetesPlugin::class)
 				it.kubernetes.apply {
@@ -42,7 +44,7 @@ object DeploymentConfigurationSpec: Spek({
 
 	describe("deployment configuration") {
 		describe("deployment dependencies") {
-			beforeEachTest {
+			beforeEach {
 				testProject.kubernetes.apply {
 					cluster("development") {
 						it.kubeconfigContext("test-dev")

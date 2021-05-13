@@ -8,10 +8,11 @@ plugins {
 dependencies {
 	implementation(name = "string-notation", version = "1.4.0", group = "de.joshuagleitze")
 
-	testFixturesImplementation(gradleKotlinDsl())
-	testFixturesImplementation(gradleApi())
-	testFixturesImplementation(gradleTestKit())
-	testFixturesImplementation(name = "atrium-fluent-en_GB", version = "0.16.0", group = "ch.tutteli.atrium")
+    testFixturesImplementation(gradleKotlinDsl())
+    testFixturesImplementation(gradleApi())
+    testFixturesImplementation(gradleTestKit())
+    testFixturesImplementation(name = "atrium-fluent-en_GB", version = "0.16.0", group = "ch.tutteli.atrium")
+    testFixturesImplementation(name = "kotest-framework-api-jvm", version = "4.5.0", group = "io.kotest")
 
 	constraints {
 		testFixturesImplementation(kotlin("reflect", version = KotlinCompilerVersion.VERSION))

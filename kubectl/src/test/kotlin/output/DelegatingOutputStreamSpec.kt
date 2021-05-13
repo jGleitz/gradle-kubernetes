@@ -5,17 +5,21 @@ import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.gradle.kubectl.output.DelegatingOutputStream.Companion.blockClose
 import de.joshuagleitze.gradle.kubectl.output.DelegatingOutputStream.Companion.onClose
 import de.joshuagleitze.test.describeType
+import io.kotest.core.spec.IsolationMode.InstancePerTest
+import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.confirmVerified
 import io.mockk.excludeRecords
 import io.mockk.spyk
 import io.mockk.verifyAll
-import org.spekframework.spek2.Spek
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 
-object DelegatingOutputStreamSpec: Spek({
-	val targetOutputStream by memoized { spyk(ByteArrayOutputStream()) }
-	val delegatingOutputStream by memoized { DelegatingOutputStream(targetOutputStream) }
+@Suppress("BlockingMethodInNonBlockingContext")
+class DelegatingOutputStreamSpec : DescribeSpec({
+	isolationMode = InstancePerTest
+
+	val targetOutputStream = spyk(ByteArrayOutputStream())
+	val delegatingOutputStream = DelegatingOutputStream(targetOutputStream)
 
 	describeType<DelegatingOutputStream> {
 		it("delegates write(Int)") {
