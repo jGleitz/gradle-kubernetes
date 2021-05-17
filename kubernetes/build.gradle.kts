@@ -15,7 +15,7 @@ gradlePlugin {
 }
 
 dependencies {
-	val spekVersion = "2.0.15"
+	val spekVersion = "2.0.16"
 
 	implementation(gradleKotlinDsl())
 	implementation(project(":common"))

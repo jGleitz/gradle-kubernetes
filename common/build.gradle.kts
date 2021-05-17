@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-	val spekVersion = "2.0.15"
+	val spekVersion = "2.0.16"
 
 	implementation(name = "string-notation", version = "1.4.0", group = "de.joshuagleitze")
 
