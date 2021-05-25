@@ -12,7 +12,7 @@ dependencies {
     testFixturesImplementation(gradleApi())
     testFixturesImplementation(gradleTestKit())
     testFixturesImplementation(name = "atrium-fluent-en_GB", version = "0.16.0", group = "ch.tutteli.atrium")
-    testFixturesImplementation(name = "kotest-framework-api-jvm", version = "4.5.0", group = "io.kotest")
+    testFixturesImplementation(name = "kotest-framework-api-jvm", version = "4.6.0", group = "io.kotest")
 
 	constraints {
 		testFixturesImplementation(kotlin("reflect", version = KotlinCompilerVersion.VERSION))
