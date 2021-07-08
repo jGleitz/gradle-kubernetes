@@ -38,7 +38,7 @@ dependencies {
 	implementation(name = "gradle-download-task", version = "4.1.2", group = "de.undercouch")
 	implementation(name = "commons-io", version = "2.10.0", group = "commons-io")
 	implementation(name = "string-notation", version = "1.4.0", group = "de.joshuagleitze")
-	implementation(name = "kotlinx-serialization-json", group = "org.jetbrains.kotlinx", version = "1.2.1")
+	implementation(name = "kotlinx-serialization-json", group = "org.jetbrains.kotlinx", version = "1.2.2")
 	implementation(name = "kaml", group = "com.charleskorn.kaml", version = "0.34.0")
 
 	testImplementation(testFixtures(project(":common")))
@@ -51,7 +51,7 @@ dependencies {
 	generatorImplementation(data.output)
 	generatorImplementation(kotlin("reflect"))
 	generatorImplementation(name = "kotlinx-coroutines-core", version = "1.5.0", group = "org.jetbrains.kotlinx")
-	generatorImplementation(name = "kotlinx-serialization-json", version = "1.2.1", group = "org.jetbrains.kotlinx")
+	generatorImplementation(name = "kotlinx-serialization-json", version = "1.2.2", group = "org.jetbrains.kotlinx")
 	generatorImplementation(name = "kotlinpoet", version = "1.9.0", group = "com.squareup")
 	generatorImplementation(name = "ktor-client-cio", version = ktorVersion, group = "io.ktor")
 	generatorImplementation(name = "ktor-client-logging", version = ktorVersion, group = "io.ktor")
