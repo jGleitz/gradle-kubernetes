@@ -5,7 +5,6 @@ import ch.tutteli.atrium.api.verbs.expect
 import de.joshuagleitze.test.describeType
 import de.joshuagleitze.test.instantiator
 import de.joshuagleitze.testfiles.kotest.testFiles
-import io.kotest.core.spec.IsolationMode
 import io.kotest.core.spec.IsolationMode.InstancePerTest
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.*

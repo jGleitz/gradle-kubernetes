@@ -7,7 +7,6 @@ import ch.tutteli.atrium.api.fluent.en_GB.withRepresentation
 import ch.tutteli.atrium.creating.Expect
 import ch.tutteli.atrium.logic._logic
 import ch.tutteli.atrium.logic.changeSubject
-import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -22,7 +21,6 @@ import org.gradle.internal.service.ServiceLookup
 import org.gradle.internal.service.UnknownServiceException
 import org.gradle.kotlin.dsl.support.serviceOf
 import java.lang.reflect.Type
-import kotlin.time.seconds
 
 fun <T, P: Provider<out T>> Expect<P>.get() = feature(Provider<out T>::get)
 
