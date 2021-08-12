@@ -6,7 +6,7 @@ import de.joshuagleitze.gradle.kubectl.tasks.KubectlDeleteTask
 import de.joshuagleitze.gradle.kubernetes.dsl.ClusterProvider
 import de.joshuagleitze.gradle.kubernetes.dsl.DefaultKubernetesDeployment
 import de.joshuagleitze.stringnotation.LowerCamelCase
-import de.joshuagleitze.stringnotation.Word
+import de.joshuagleitze.stringnotation.fromNotation
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
@@ -19,7 +19,7 @@ public open class KustomizationDeclaration @Inject constructor(
 	containerName: String,
 	cluster: ClusterProvider,
 	tasks: TaskContainer
-): KustomizationSpec, DefaultKubernetesDeployment<KubectlApplyTask, KubectlDeleteTask>(
+) : KustomizationSpec, DefaultKubernetesDeployment<KubectlApplyTask, KubectlDeleteTask>(
 	cluster, tasks,
 	deployment = tasks.register<KubectlApplyTask>(actionTaskName("apply", containerName, cluster)),
 	teardown = tasks.register<KubectlDeleteTask>(actionTaskName("delete", containerName, cluster))
@@ -36,12 +36,12 @@ public open class KustomizationDeclaration @Inject constructor(
 	/**
 	 * The task that will apply the kustomization. Synonym for [deployment].
 	 */
-	public final val applyTask: TaskProvider<KubectlApplyTask> get() = deployment
+	public val applyTask: TaskProvider<KubectlApplyTask> get() = deployment
 
 	/**
 	 * The task that will delete the kustomization. Synonym for [teardown].
 	 */
-	public final val deleteTask: TaskProvider<KubectlDeleteTask> get() = teardown
+	public val deleteTask: TaskProvider<KubectlDeleteTask> get() = teardown
 
 	override fun kustomizationDir(dir: File) {
 		applyTask {
@@ -63,7 +63,11 @@ public open class KustomizationDeclaration @Inject constructor(
 	}
 
 	private companion object {
-		private fun actionTaskName(action: String, containerName: String, cluster: ClusterProvider) =
-			Word(action, containerName, "Kustomization", cluster.name).toNotation(LowerCamelCase)
+		private fun actionTaskName(action: String, containerName: String, cluster: ClusterProvider) = (
+			action.fromNotation(LowerCamelCase)
+				+ containerName.fromNotation(LowerCamelCase)
+				+ "Kustomization"
+				+ cluster.name.fromNotation(LowerCamelCase)
+			).toNotation(LowerCamelCase)
 	}
 }

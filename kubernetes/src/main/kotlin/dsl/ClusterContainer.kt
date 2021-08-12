@@ -1,6 +1,6 @@
 package de.joshuagleitze.gradle.kubernetes.dsl
 
-import de.joshuagleitze.gradle.GradleInputNotation
+import de.joshuagleitze.gradle.kubernetes.GradleInputNotation
 import de.joshuagleitze.stringnotation.LowerCamelCase
 import de.joshuagleitze.stringnotation.Word
 import de.joshuagleitze.stringnotation.fromNotation

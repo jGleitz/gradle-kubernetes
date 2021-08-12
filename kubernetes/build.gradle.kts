@@ -1,25 +1,40 @@
+@file:Suppress("SuspiciousCollectionReassignment")
+
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 
 plugins {
 	kotlin("jvm")
 	`java-gradle-plugin`
+	`maven-publish`
+	`java-test-fixtures`
+	id("com.gradle.plugin-publish")
 }
 
 gradlePlugin {
 	plugins {
 		create("kubernetes") {
-			id = "${project.group}.kubernetes"
+			id = "de.joshuagleitze.kubernetes"
 			implementationClass = "de.joshuagleitze.gradle.kubernetes.KubernetesPlugin"
 		}
 	}
 }
 
+pluginBundle {
+	website = "https://github.com/jGleitz/gradle-kubernetes"
+	vcsUrl = "https://github.com/jGleitz/gradle-kubernetes"
+	tags = listOf("kubernetes", "k8s")
+}
+
 dependencies {
 	implementation(gradleKotlinDsl())
-	implementation(project(":common"))
 	implementation(name = "string-notation", version = "1.4.0", group = "de.joshuagleitze")
 
-	testImplementation(testFixtures(project(":common")))
+	testFixturesImplementation(gradleKotlinDsl())
+	testFixturesImplementation(gradleApi())
+	testFixturesImplementation(gradleTestKit())
+	testFixturesImplementation(name = "atrium-fluent-en_GB", version = "0.16.0", group = "ch.tutteli.atrium")
+	testFixturesImplementation(name = "kotest-framework-api-jvm", version = "4.6.1", group = "io.kotest")
+
 	testImplementation(name = "kotest-runner-junit5", version = "4.6.1", group = "io.kotest")
 	testImplementation(name = "atrium-fluent-en_GB", version = "0.16.0", group = "ch.tutteli.atrium")
 	testImplementation(name = "atrium-gradle-testkit-fluent-en", version = "1.0.1", group = "de.joshuagleitze")
@@ -45,6 +60,15 @@ tasks.compileTestKotlin {
 	kotlinOptions {
 		jvmTarget = "1.8"
 		freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
+		freeCompilerArgs += "-Xopt-in=kotlin.io.path.ExperimentalPathApi"
+	}
+}
+
+tasks.compileTestFixturesKotlin {
+	kotlinOptions {
+		jvmTarget = "1.8"
+		freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
+		freeCompilerArgs += "-Xopt-in=ch.tutteli.atrium.api.fluent.en_GB.ExperimentalWithOptions"
 		freeCompilerArgs += "-Xopt-in=kotlin.io.path.ExperimentalPathApi"
 	}
 }

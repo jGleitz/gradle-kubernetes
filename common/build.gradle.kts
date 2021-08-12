@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 plugins {
 	kotlin("jvm")
 	`java-test-fixtures`
+	`maven-publish`
 }
 
 dependencies {
@@ -25,5 +26,13 @@ tasks.compileTestFixturesKotlin {
 		freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
 		freeCompilerArgs += "-Xopt-in=ch.tutteli.atrium.api.fluent.en_GB.ExperimentalWithOptions"
 		freeCompilerArgs += "-Xopt-in=kotlin.io.path.ExperimentalPathApi"
+	}
+}
+
+publishing {
+	publications {
+		create<MavenPublication>("maven") {
+			from(components["java"])
+		}
 	}
 }
