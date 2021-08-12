@@ -1,8 +1,8 @@
 package de.joshuagleitze.gradle.kubectl.dsl
 
-import de.joshuagleitze.gradle.GradleInputNotation
 import de.joshuagleitze.gradle.kubectl.KubectlVersion
 import de.joshuagleitze.gradle.kubectl.data.KubectlRelease
+import de.joshuagleitze.gradle.kubernetes.GradleInputNotation
 import de.joshuagleitze.gradle.kubernetes.dsl.KubernetesExtension.Companion.kubernetes
 import de.joshuagleitze.stringnotation.LowerCamelCase
 import de.joshuagleitze.stringnotation.fromNotation
@@ -35,7 +35,7 @@ public open class KubectlExtension(private val project: Project, objects: Object
 
 	@JvmOverloads
 	public fun kustomization(configuration: Action<in MultiClusterKustomizationDeclaration> = Action {}): NamedDomainObjectProvider<MultiClusterKustomizationDeclaration> =
-		kustomization(project.projectDir)
+		kustomization(project.projectDir).apply { configure(configuration) }
 
 	@JvmOverloads
 	public fun kustomization(
