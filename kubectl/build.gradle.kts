@@ -39,7 +39,7 @@ dependencies {
 	implementation(name = "commons-io", version = "2.11.0", group = "commons-io")
 	implementation(name = "string-notation", version = "1.4.0", group = "de.joshuagleitze")
 	implementation(name = "kotlinx-serialization-json", group = "org.jetbrains.kotlinx", version = "1.2.2")
-	implementation(name = "kaml", group = "com.charleskorn.kaml", version = "0.35.1")
+	implementation(name = "kaml", group = "com.charleskorn.kaml", version = "0.35.2")
 
 	testImplementation(testFixtures(project(":common")))
 	testImplementation(name = "kotest-runner-junit5", version = "4.6.1", group = "io.kotest")
