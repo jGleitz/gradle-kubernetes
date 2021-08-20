@@ -61,12 +61,21 @@ subprojects {
 				}
 			}
 
-			repositories.maven("https://maven.pkg.github.com/$githubRepository") {
+			val githubPackages = repositories.maven("https://maven.pkg.github.com/$githubRepository") {
 				name = "GitHubPackages"
 				credentials {
 					username = githubOwner
 					password = githubToken
 				}
+			}
+
+			val publishToGithub = tasks.named("publishAllPublicationsTo${githubPackages.name.capitalize()}Repository")
+			val publishPlugins by tasks
+
+			tasks.register("release") {
+				group = "release"
+				description = "Releases the project to all remote repositories"
+				dependsOn(publishToGithub, publishPlugins)
 			}
 		}
 	}

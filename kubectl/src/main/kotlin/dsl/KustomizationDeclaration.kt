@@ -58,7 +58,7 @@ public open class KustomizationDeclaration @Inject constructor(
 		}
 		deleteTask {
 			kustomizationDir.set(null as Directory?)
-			this@deleteTask.selector.set(selector)
+			this.selector.set(selector)
 		}
 	}
 
