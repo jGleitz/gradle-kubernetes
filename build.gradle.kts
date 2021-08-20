@@ -1,13 +1,18 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
 	kotlin("jvm") version "1.4.32" apply false
+	id("org.jetbrains.dokka") version "1.4.32"
 	id("com.palantir.git-version") version "0.12.3"
 	id("com.gradle.plugin-publish") version "0.15.0" apply false
 	`maven-publish`
+	signing
 }
 
 group = "de.joshuagleitze.gradle.k8s"
 version = if (isSnapshot) versionDetails.gitHash else versionDetails.lastTag.drop("v")
 status = if (isSnapshot) "snapshot" else "release"
+val gitRef = if (isSnapshot) versionDetails.gitHash else versionDetails.lastTag
 
 allprojects {
 	repositories {
@@ -24,9 +29,34 @@ subprojects {
 	version = rootProject.version
 	status = rootProject.status
 
+	apply {
+		plugin("org.gradle.maven-publish")
+		plugin("org.gradle.signing")
+	}
+
+	signing {
+		val signingKey: String? by project
+		val signingKeyPassword: String? by project
+		useInMemoryPgpKeys(signingKey, signingKeyPassword)
+	}
+
 	afterEvaluate {
+		tasks.withType<DokkaTask> {
+			dokkaSourceSets.named("main") {
+				this.DokkaSourceSetID(if (extra.has("artifactId")) extra["artifactId"] as String else project.name)
+				sourceLink {
+					val projectPath = projectDir.absoluteFile.relativeTo(rootProject.projectDir.absoluteFile)
+					localDirectory.set(file("src/main/kotlin"))
+					remoteUrl.set(uri("https://github.com/$githubRepository/blob/$gitRef/$projectPath/src/main/kotlin").toURL())
+					remoteLineSuffix.set("#L")
+				}
+			}
+		}
+
 		publishing {
 			publications.withType<MavenPublication> {
+				signing.sign(this)
+
 				pom {
 					name.set("$groupId:$artifactId")
 					if (extra.has("description")) description.set(extra["description"] as String)

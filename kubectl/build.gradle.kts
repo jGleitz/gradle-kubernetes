@@ -9,10 +9,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
 	kotlin("jvm")
 	`java-gradle-plugin`
-	`maven-publish`
 	id("com.gradle.plugin-publish")
 	id("de.undercouch.download")
+	id("org.jetbrains.dokka")
 }
+
+val artifactId by extra("kubectl")
+val description by extra("Deploy with Kubectl in Gradle.")
 
 gradlePlugin {
 	plugins {
