@@ -5,10 +5,13 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 plugins {
 	kotlin("jvm")
 	`java-gradle-plugin`
-	`maven-publish`
 	`java-test-fixtures`
 	id("com.gradle.plugin-publish")
+	id("org.jetbrains.dokka")
 }
+
+val artifactId by extra("kubernetes")
+val description by extra("Declare Kubernetes clusters for deployments in Gradle.")
 
 gradlePlugin {
 	plugins {
