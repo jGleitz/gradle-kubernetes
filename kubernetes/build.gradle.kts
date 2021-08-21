@@ -17,6 +17,8 @@ gradlePlugin {
 	plugins {
 		create("kubernetes") {
 			id = "de.joshuagleitze.kubernetes"
+			displayName = "kubernetes"
+			description = "Allows declaring kubernetes clusters so other plugins can deploy to them."
 			implementationClass = "de.joshuagleitze.gradle.kubernetes.KubernetesPlugin"
 		}
 	}

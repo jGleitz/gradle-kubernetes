@@ -44,7 +44,6 @@ subprojects {
 		val projectDescription = extra["description"] as String
 
 		pluginBundle {
-			description = projectDescription
 			website = "https://github.com/$githubRepository"
 			vcsUrl = "https://github.com/$githubRepository"
 		}

@@ -21,6 +21,8 @@ gradlePlugin {
 	plugins {
 		create("kubectl") {
 			id = "de.joshuagleitze.kubectl"
+			displayName = "kubectl"
+			description = "Deploy to kubernetes using kubectl."
 			implementationClass = "de.joshuagleitze.gradle.kubectl.KubectlPlugin"
 		}
 	}
