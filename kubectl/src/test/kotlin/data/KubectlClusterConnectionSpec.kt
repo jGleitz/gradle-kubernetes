@@ -15,6 +15,7 @@ import java.nio.file.Path
 
 class KubectlClusterConnectionSpec : DescribeSpec({
 	val certificate = testFiles.createFile("certificate")
+	val key = testFiles.createFile("key")
 
 	describeType<KubeconfigContext> {
 		it("generates the --context option") {
@@ -89,6 +90,14 @@ class KubectlClusterConnectionSpec : DescribeSpec({
 			expect(BasicAuth("testuser", "testpassword"))
 				.feature(KubernetesAuthOptions::generateKubectlArguments).asList()
 				.containsExactly("--username=testuser", "--password=testpassword")
+		}
+	}
+
+	describeType<MtlsAuth> {
+		it("generates the --client-certificate and --client-key options") {
+			expect(MtlsAuth(certificate, key))
+				.feature(KubernetesAuthOptions::generateKubectlArguments).asList()
+				.containsExactly("--client-certificate=$certificate", "--client-key=$key")
 		}
 	}
 
