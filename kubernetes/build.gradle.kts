@@ -23,9 +23,7 @@ gradlePlugin {
 }
 
 pluginBundle {
-	website = "https://github.com/jGleitz/gradle-kubernetes"
-	vcsUrl = "https://github.com/jGleitz/gradle-kubernetes"
-	tags = listOf("kubernetes", "k8s")
+	tags = listOf("kubernetes", "k8s", "cloud")
 }
 
 dependencies {

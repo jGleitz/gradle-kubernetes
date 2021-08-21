@@ -27,9 +27,7 @@ gradlePlugin {
 }
 
 pluginBundle {
-	website = "https://github.com/jGleitz/gradle-kubernetes"
-	vcsUrl = "https://github.com/jGleitz/gradle-kubernetes"
-	tags = listOf("kubernetes", "k8s")
+	tags = listOf("kubernetes", "k8s", "kubectl", "deployment", "cloud")
 }
 
 val generator by sourceSets.creating
