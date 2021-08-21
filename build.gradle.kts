@@ -4,7 +4,7 @@ plugins {
 	kotlin("jvm") version "1.4.32" apply false
 	id("org.jetbrains.dokka") version "1.4.32"
 	id("com.palantir.git-version") version "0.12.3"
-	id("com.gradle.plugin-publish") version "0.15.0" apply false
+	id("com.gradle.plugin-publish") version "0.15.0"
 	`maven-publish`
 	signing
 }
@@ -41,6 +41,14 @@ subprojects {
 	}
 
 	afterEvaluate {
+		val projectDescription = extra["description"] as String
+
+		pluginBundle {
+			description = projectDescription
+			website = "https://github.com/$githubRepository"
+			vcsUrl = "https://github.com/$githubRepository"
+		}
+
 		tasks.withType<DokkaTask> {
 			dokkaSourceSets.named("main") {
 				this.DokkaSourceSetID(if (extra.has("artifactId")) extra["artifactId"] as String else project.name)
@@ -59,7 +67,7 @@ subprojects {
 
 				pom {
 					name.set("$groupId:$artifactId")
-					if (extra.has("description")) description.set(extra["description"] as String)
+					description.set(projectDescription)
 					inceptionYear.set("2020")
 					url.set("https://github.com/$githubRepository")
 					ciManagement {
