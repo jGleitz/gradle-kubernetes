@@ -18,5 +18,8 @@ internal fun KubernetesAuthOptions.generateKubectlArguments() = when (this) {
 	is NoAuth -> noArguments()
 	is KubeconfigUser -> Arguments("--user=$userName")
 	is BasicAuth -> Arguments("--username=$userName", "--password=$password")
-	is MtlsAuth -> Arguments("--client-certificate=${clientCertificate.toAbsolutePath()}")
+	is MtlsAuth -> Arguments(
+		"--client-certificate=${clientCertificate.toAbsolutePath()}",
+		"--client-key=${clientKey.toAbsolutePath()}"
+	)
 }
