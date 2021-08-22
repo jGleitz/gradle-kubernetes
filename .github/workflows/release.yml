@@ -39,8 +39,8 @@ jobs:
           ORG_GRADLE_PROJECT_signingKeyPassword: ${{ secrets.PACKAGE_SIGNING_KEY_PASSWORD }}
           ORG_GRADLE_PROJECT_githubRepository: ${{ github.repository }}
           ORG_GRADLE_PROJECT_githubToken: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-          ORG_GRADLE_PROJECT_gradle.publish.key: ${{ secrets.GRADLE_PUBLISH_KEY }}
-          ORG_GRADLE_PROJECT_gradle.publish.secret: ${{ secrets.GRADLE_PUBLISH_SECRET }}
+          GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
+          GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
 
   docs:
     name: Publish Documentation
