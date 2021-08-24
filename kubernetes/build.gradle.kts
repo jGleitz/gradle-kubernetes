@@ -36,7 +36,7 @@ dependencies {
 	testFixturesImplementation(gradleApi())
 	testFixturesImplementation(gradleTestKit())
 	testFixturesImplementation(name = "atrium-fluent-en_GB", version = "0.16.0", group = "ch.tutteli.atrium")
-	testFixturesImplementation(name = "kotest-framework-api-jvm", version = "4.6.1", group = "io.kotest")
+	testFixturesImplementation(name = "kotest-framework-api-jvm", version = "4.6.2", group = "io.kotest")
 
 	testImplementation(name = "kotest-runner-junit5", version = "4.6.1", group = "io.kotest")
 	testImplementation(name = "atrium-fluent-en_GB", version = "0.16.0", group = "ch.tutteli.atrium")
