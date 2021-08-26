@@ -45,7 +45,7 @@ val jar by tasks.existing(Jar::class) {
 }
 
 dependencies {
-	val ktorVersion = "1.6.2"
+	val ktorVersion = "1.6.3"
 
 	implementation(data.output)
 	api(generated.output)
