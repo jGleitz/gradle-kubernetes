@@ -1,6 +1,7 @@
 {
   "extends": [
     "config:base",
+    ":disableDependencyDashboard",
     "robstoll/renovate-presets-jvm",
     "github>robstoll/renovate-presets-jvm"
   ],
