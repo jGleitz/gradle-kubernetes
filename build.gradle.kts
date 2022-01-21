@@ -2,7 +2,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
 	kotlin("jvm") version "1.6.0" apply false
-	id("org.jetbrains.dokka") version "1.6.0"
+	id("org.jetbrains.dokka") version "1.6.10"
 	id("com.palantir.git-version") version "0.12.3"
 	id("com.gradle.plugin-publish") version "0.15.0"
 	`maven-publish`
